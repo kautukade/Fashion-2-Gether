@@ -1,20 +1,59 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingBag, Star, ChevronRight, Truck, RotateCcw, Shield, Minus, Plus, Share2 } from 'lucide-react';
+import { Heart, ShoppingBag, Star, ChevronRight, Truck, RotateCcw, Shield, Minus, Plus, Share2, Check } from 'lucide-react';
 import { products } from '../data/products';
 import ProductCard from '../components/ProductCard';
+import { useCartStore } from '../contexts/cartStore';
+import { useWishlistStore } from '../contexts/wishlistStore';
 
 export default function ProductDetail() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const product = products.find(p => p.slug === slug) || products[0];
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [showSizeError, setShowSizeError] = useState(false);
+
+  const addItem = useCartStore((s) => s.addItem);
+  const isWishlisted = useWishlistStore((s) => s.isWishlisted(product.id));
+  const toggleWishlist = useWishlistStore((s) => s.toggleItem);
+
+  const handleAddToCart = () => {
+    if (!selectedSize) {
+      setShowSizeError(true);
+      return;
+    }
+    setShowSizeError(false);
+    addItem({
+      productId: product.id,
+      variantId: `${product.id}-${selectedColor}-${selectedSize}`,
+      name: product.name,
+      image: product.images[0],
+      color: selectedColor,
+      size: selectedSize,
+      price: product.price,
+      mrp: product.mrp,
+      quantity,
+      slug: product.slug,
+    });
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    if (!selectedSize) {
+      setShowSizeError(true);
+      return;
+    }
+    handleAddToCart();
+    navigate('/checkout');
+  };
 
   const discount = Math.round(((product.mrp - product.price) / product.mrp) * 100);
 
@@ -187,29 +226,42 @@ export default function ProductDetail() {
             </div>
 
             {/* Action Buttons */}
+            {/* Size Error */}
+            {showSizeError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-sm text-sm text-red-700">
+                Please select a size before adding to bag.
+              </div>
+            )}
+
+            {/* Added to Cart Success */}
+            {addedToCart && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-sm text-sm text-green-700 flex items-center gap-2">
+                <Check size={14} /> Added to bag successfully!
+              </div>
+            )}
+
             <div className="flex gap-3 mb-6">
-              <button className="flex-1 btn-primary flex items-center justify-center gap-2">
+              <button onClick={handleAddToCart} className="flex-1 btn-primary flex items-center justify-center gap-2">
                 <ShoppingBag size={16} />
-                ADD TO BAG
+                {addedToCart ? 'ADDED ✓' : 'ADD TO BAG'}
               </button>
-              <button
-                onClick={() => setIsWishlisted(!isWishlisted)}
-                className={`w-12 h-12 border rounded-sm flex items-center justify-center transition-all ${
-                  isWishlisted ? 'bg-red-50 border-red-200 text-red-500' : 'border-charcoal/20 hover:border-charcoal'
-                }`}
-              >
-                <Heart size={18} className={isWishlisted ? 'fill-current' : ''} />
-              </button>
-              <button className="w-12 h-12 border border-charcoal/20 rounded-sm flex items-center justify-center hover:border-charcoal transition-all">
+            <button
+              onClick={() => toggleWishlist(product.id)}
+              className={`w-12 h-12 border rounded-sm flex items-center justify-center transition-all ${
+                isWishlisted ? 'bg-red-50 border-red-200 text-red-500' : 'border-charcoal/20 hover:border-charcoal'
+              }`}
+            >
+              <Heart size={18} className={isWishlisted ? 'fill-current' : ''} />
+            </button>              <button className="w-12 h-12 border border-charcoal/20 rounded-sm flex items-center justify-center hover:border-charcoal transition-all">
                 <Share2 size={16} />
               </button>
             </div>
 
             {/* Buy Now + WhatsApp */}
             <div className="flex gap-3 mb-8">
-              <button className="flex-1 btn-outline">BUY NOW</button>
+              <button onClick={handleBuyNow} className="flex-1 btn-outline">BUY NOW</button>
               <a
-                href={`https://wa.me/919876543210?text=${encodeURIComponent(`Hi Fashion 2 Gether,\nI am interested in:\n\n${product.name}\nSize: ${selectedSize || 'Not selected'}\nColor: ${selectedColor}\nPrice: ₹${product.price}`)}`}
+                href={`https://wa.me/919595535339?text=${encodeURIComponent(`Hi Fashion 2 Gether,\nI am interested in:\n\n${product.name}\nSize: ${selectedSize || 'Not selected'}\nColor: ${selectedColor}\nPrice: ₹${product.price}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-outline border-green-700 text-green-700 hover:bg-green-700 hover:text-white flex items-center gap-2"
@@ -293,12 +345,12 @@ export default function ProductDetail() {
 
       {/* Mobile Sticky CTA */}
       <div className="fixed bottom-16 lg:bottom-0 left-0 right-0 bg-cream/95 backdrop-blur-md border-t border-charcoal/10 p-3 flex gap-3 lg:hidden z-50">
-        <button className="flex-1 btn-primary text-xs py-3">
+        <button onClick={handleAddToCart} className="flex-1 btn-primary text-xs py-3">
           <ShoppingBag size={14} className="mr-2" />
-          ADD TO BAG — ₹{product.price.toLocaleString()}
+          {addedToCart ? 'ADDED ✓' : `ADD TO BAG — ₹${product.price.toLocaleString()}`}
         </button>
         <button
-          onClick={() => setIsWishlisted(!isWishlisted)}
+          onClick={() => toggleWishlist(product.id)}
           className={`w-11 h-11 border rounded-sm flex items-center justify-center ${
             isWishlisted ? 'bg-red-50 border-red-200 text-red-500' : 'border-charcoal/20'
           }`}
