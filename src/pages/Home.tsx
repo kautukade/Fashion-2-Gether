@@ -1,4 +1,5 @@
 import Hero from '../components/Hero';
+import BrandStatement from '../components/BrandStatement';
 import {
   NewDropSection,
   ShopByCategorySection,
@@ -16,9 +17,12 @@ import {
 
 export default function Home() {
   return (
-    <main className="page-transition">
+    <main className="page-transition overflow-hidden">
       <Hero />
-      <NewDropSection />
+      <BrandStatement />
+      <div id="new-drop" className="scroll-mt-28">
+        <NewDropSection />
+      </div>
       <ShopByCategorySection />
       <TrendingSection />
       <InteractiveSection />
