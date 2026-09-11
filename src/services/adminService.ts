@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const adminService = {
   async createProduct(product: Record<string, unknown>) {
     if (!isSupabaseConfigured() || !supabase) return { data: null, error: 'Supabase not configured' };

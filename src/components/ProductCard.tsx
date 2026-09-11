@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingBag, Eye } from 'lucide-react';
+import { useWishlistStore } from '../contexts/wishlistStore';
 import type { Product } from '../data/products';
 
 interface ProductCardProps {
@@ -11,7 +12,8 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const isWishlisted = useWishlistStore((s) => s.isWishlisted(product.id));
+  const toggleWishlist = useWishlistStore((s) => s.toggleItem);
 
   const discount = Math.round(((product.mrp - product.price) / product.mrp) * 100);
 
@@ -83,7 +85,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             style={{ display: discount > 0 ? 'none' : 'flex' }}
             onClick={(e) => {
               e.preventDefault();
-              setIsWishlisted(!isWishlisted);
+              toggleWishlist(product.id);
             }}
           >
             <Heart
