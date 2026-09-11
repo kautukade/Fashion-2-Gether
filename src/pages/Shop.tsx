@@ -13,10 +13,10 @@ export default function Shop() {
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('all');
   const [gridCols, setGridCols] = useState(3);
   const [products, setProducts] = useState<CardProduct[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const categories = ['all', 'Western Wear', 'Ethnic Wear', 'Party Wear', 'Casual Wear', 'Festive Wear', 'Bottom Wear'];
   const priceRanges = [
     { label: 'All Prices', value: 'all' },
     { label: 'Under ₹1000', value: '0-1000' },
@@ -24,6 +24,16 @@ export default function Shop() {
     { label: '₹2000 - ₹5000', value: '2000-5000' },
     { label: 'Above ₹5000', value: '5000-99999' },
   ];
+
+  // Load categories from database
+  useEffect(() => {
+    productService.getCategories().then(cats => {
+      setCategories(cats);
+    }).catch(() => {
+      // Fallback to empty categories if Supabase not configured
+      setCategories([]);
+    });
+  }, []);
 
   useEffect(() => {
     loadProducts();
@@ -155,15 +165,23 @@ export default function Shop() {
               <div>
                 <h3 className="text-xs font-semibold tracking-[0.15em] uppercase text-charcoal mb-3">Category</h3>
                 <div className="space-y-2">
+                  <button
+                    onClick={() => setSelectedCategory('all')}
+                    className={`block text-sm capitalize transition-colors ${
+                      selectedCategory === 'all' ? 'text-charcoal font-medium' : 'text-charcoal/50 hover:text-charcoal'
+                    }`}
+                  >
+                    All Categories
+                  </button>
                   {categories.map((cat) => (
                     <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
                       className={`block text-sm capitalize transition-colors ${
-                        selectedCategory === cat ? 'text-charcoal font-medium' : 'text-charcoal/50 hover:text-charcoal'
+                        selectedCategory === cat.id ? 'text-charcoal font-medium' : 'text-charcoal/50 hover:text-charcoal'
                       }`}
                     >
-                      {cat === 'all' ? 'All Categories' : cat}
+                      {cat.name}
                     </button>
                   ))}
                 </div>
@@ -265,17 +283,27 @@ export default function Shop() {
                   <div>
                     <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-charcoal mb-3">Category</h4>
                     <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setSelectedCategory('all')}
+                        className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
+                          selectedCategory === 'all'
+                            ? 'bg-charcoal text-white border-charcoal'
+                            : 'border-charcoal/20 text-charcoal/70 hover:border-charcoal'
+                        }`}
+                      >
+                        All
+                      </button>
                       {categories.map((cat) => (
                         <button
-                          key={cat}
-                          onClick={() => setSelectedCategory(cat)}
+                          key={cat.id}
+                          onClick={() => setSelectedCategory(cat.id)}
                           className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
-                            selectedCategory === cat
+                            selectedCategory === cat.id
                               ? 'bg-charcoal text-white border-charcoal'
                               : 'border-charcoal/20 text-charcoal/70 hover:border-charcoal'
                           }`}
                         >
-                          {cat === 'all' ? 'All' : cat}
+                          {cat.name}
                         </button>
                       ))}
                     </div>

@@ -114,26 +114,27 @@ export default function Checkout() {
         landmark: form.landmark,
       };
 
-      // Call secure order creation function
-      // This function validates stock, calculates prices server-side, and creates order atomically
-      const { data: orderResult, error: orderError } = await supabase.rpc('create_secure_order', {
-        p_guest_email: user ? null : form.email,
-        p_guest_phone: user ? null : form.phone,
-        p_customer_id: user ? user.id : null,
-        p_items: orderItems,
-        p_shipping_address: shippingAddress,
-        p_payment_method: form.paymentMethod,
+      // Call Edge Function for secure order creation
+      // Edge Function uses service_role internally and handles customer_id mapping
+      const { data: functionResult, error: functionError } = await supabase.functions.invoke('create-order', {
+        body: {
+          items: orderItems,
+          shipping_address: shippingAddress,
+          payment_method: form.paymentMethod,
+          guest_email: user ? null : form.email,
+          guest_phone: user ? null : form.phone,
+        },
       });
 
-      if (orderError) {
-        throw new Error(orderError.message || 'Failed to create order');
+      if (functionError) {
+        throw new Error(functionError.message || 'Failed to create order');
       }
 
-      if (!orderResult) {
-        throw new Error('Order creation failed');
+      if (!functionResult.success) {
+        throw new Error(functionResult.error || 'Order creation failed');
       }
 
-      const orderNumber = orderResult.order_number;
+      const orderNumber = functionResult.order.order_number;
 
       clearCart();
       navigate(`/order-success/${orderNumber}`);

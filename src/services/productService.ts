@@ -28,7 +28,7 @@ export const productService = {
       return result as Product[];
     }
 
-    let query = supabase.from('products').select('*');
+    let query = supabase.from('products').select('*, product_media(*), product_variants(*)');
 
     if (filters?.status) {
       query = query.eq('status', filters.status);
@@ -53,11 +53,15 @@ export const productService = {
     return data || [];
   },
 
-  async getBySlug(slug: string): Promise<Product | null> {
+  async getBySlug(slug: string): Promise<Product & { media?: any[] } | null> {
     if (!isSupabaseConfigured() || !supabase) {
       return (demoProducts.find(p => p.slug === slug) as unknown as Product) || null;
     }
-    const { data, error } = await supabase.from('products').select('*').eq('slug', slug).single();
+    const { data, error } = await supabase
+      .from('products')
+      .select('*, product_media(*)')
+      .eq('slug', slug)
+      .single();
     if (error) return null;
     return data;
   },

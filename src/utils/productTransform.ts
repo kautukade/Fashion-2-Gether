@@ -4,19 +4,42 @@ import type { Product as CardProduct } from '../data/products';
 /**
  * Transform database product to ProductCard format
  */
-export function transformProductForCard(dbProduct: DbProduct): CardProduct {
+export function transformProductForCard(dbProduct: DbProduct & { product_media?: any[]; variants?: any[] }): CardProduct {
   // Determine badge based on flags
   let badge: CardProduct['badge'] = undefined;
   if (dbProduct.is_bestseller) badge = 'BESTSELLER';
   else if (dbProduct.is_trending) badge = 'TRENDING';
   else if (dbProduct.is_featured) badge = 'NEW';
   
-  // For now, use placeholder images since we don't have media URLs in the product table
-  // In production, you'd fetch from product_media table
-  const images = [
-    'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=1000&fit=crop'
-  ];
+  // Use real media from database if available
+  let images: string[] = [];
+  if (dbProduct.product_media && dbProduct.product_media.length > 0) {
+    images = dbProduct.product_media
+      .filter(m => m.type === 'image')
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(m => m.url);
+  }
+  
+  // Fallback to placeholder only if no media exists
+  if (images.length === 0) {
+    images = ['https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&h=1000&fit=crop'];
+  }
+
+  // Get colors and sizes from variants if available
+  let colors: string[] = [];
+  let sizes: string[] = [];
+  let inStock = false;
+
+  if (dbProduct.variants && dbProduct.variants.length > 0) {
+    colors = [...new Set(dbProduct.variants.map(v => v.color))];
+    sizes = [...new Set(dbProduct.variants.map(v => v.size))];
+    inStock = dbProduct.variants.some(v => v.stock_quantity > 0);
+  } else {
+    // Fallback for demo mode
+    colors = ['Black', 'White'];
+    sizes = ['S', 'M', 'L'];
+    inStock = true;
+  }
 
   return {
     id: dbProduct.id,
@@ -27,15 +50,15 @@ export function transformProductForCard(dbProduct: DbProduct): CardProduct {
     images,
     category: dbProduct.category_id || '',
     collection: dbProduct.collection_id || '',
-    colors: ['Black', 'White', 'Red', 'Blue'], // Placeholder - should come from variants
-    sizes: ['S', 'M', 'L', 'XL'], // Placeholder - should come from variants
+    colors,
+    sizes,
     badge,
     description: dbProduct.description || dbProduct.short_description || '',
     fabric: dbProduct.fabric || '',
     fit: dbProduct.fit || '',
-    inStock: true, // Should check variants
-    rating: 4.5, // Placeholder
-    reviews: 0, // Placeholder
+    inStock,
+    rating: 0, // No ratings implemented yet
+    reviews: 0,
   };
 }
 

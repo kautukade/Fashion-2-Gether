@@ -20,25 +20,27 @@ export default function TrackOrder() {
       return;
     }
 
-    // Use secure RPC function for order tracking
-    const { data, error: err } = await supabase.rpc('track_order_by_phone', {
-      p_order_number: orderNumber,
-      p_phone: phone,
+    // Call Edge Function for secure order tracking
+    const { data: functionResult, error: functionError } = await supabase.functions.invoke('track-order', {
+      body: {
+        order_number: orderNumber,
+        phone: phone,
+      },
     });
 
-    if (err) {
+    if (functionError) {
       setError('Failed to track order. Please try again.');
       setLoading(false);
       return;
     }
 
-    if (!data) {
-      setError('Order not found. Please check your order number and phone.');
+    if (!functionResult.success) {
+      setError(functionResult.error || 'Order not found. Please check your order number and phone.');
       setLoading(false);
       return;
     }
 
-    setOrder(data);
+    setOrder(functionResult.order);
     setLoading(false);
   };
 
