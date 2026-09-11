@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Heart, Search, Menu, X, User } from 'lucide-react';
+import { ShoppingBag, Heart, Search, Menu, X, User, ArrowUpRight } from 'lucide-react';
 import { useCartStore } from '../contexts/cartStore';
 import { useWishlistStore } from '../contexts/wishlistStore';
+import BrandLogo from './BrandLogo';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -13,19 +14,20 @@ export default function Navbar() {
   const wishlistCount = useWishlistStore((s) => s.getCount());
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 24);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
-  }, [location]);
+  }, [location.pathname, location.search]);
 
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Shop', path: '/shop' },
-    { name: 'New Arrivals', path: '/shop?filter=new' },
+    { name: 'New Drop', path: '/shop?filter=new' },
     { name: 'Collections', path: '/shop?filter=collections' },
     { name: 'Sale', path: '/shop?filter=sale' },
     { name: 'About', path: '/about' },
@@ -33,161 +35,139 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Announcement Bar */}
-      <div className="bg-charcoal text-white py-2.5 overflow-hidden">
-        <div className="marquee-container">
+      <div className="fixed inset-x-0 top-0 z-[1100] h-8 brand-announcement text-white overflow-hidden">
+        <div className="marquee-container h-full flex items-center">
           <div className="marquee-content">
-            <span className="text-xs tracking-[0.2em] uppercase px-8">✦ Free Shipping Above ₹999</span>
-            <span className="text-xs tracking-[0.2em] uppercase px-8">✦ New Season Drop Live Now</span>
-            <span className="text-xs tracking-[0.2em] uppercase px-8">✦ All India Shipping Available</span>
-            <span className="text-xs tracking-[0.2em] uppercase px-8">✦ Use Code: WELCOME10 for 10% Off</span>
-            <span className="text-xs tracking-[0.2em] uppercase px-8">✦ Free Shipping Above ₹999</span>
-            <span className="text-xs tracking-[0.2em] uppercase px-8">✦ New Season Drop Live Now</span>
-            <span className="text-xs tracking-[0.2em] uppercase px-8">✦ All India Shipping Available</span>
-            <span className="text-xs tracking-[0.2em] uppercase px-8">✦ Use Code: WELCOME10 for 10% Off</span>
+            <span className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase px-8">✦ Yavatmal's Most Trending Store</span>
+            <span className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase px-8">✦ All India Shipping</span>
+            <span className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase px-8">✦ Wear better. Look better.</span>
+            <span className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase px-8">✦ WhatsApp +91 95955 35339</span>
+            <span className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase px-8">✦ Yavatmal's Most Trending Store</span>
+            <span className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase px-8">✦ All India Shipping</span>
+            <span className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase px-8">✦ Wear better. Look better.</span>
           </div>
         </div>
       </div>
 
-      {/* Main Navbar */}
       <motion.header
-        className={`fixed top-[38px] left-0 right-0 z-[1000] transition-all duration-500 ${
-          isScrolled ? 'glass shadow-sm' : 'bg-transparent'
+        className={`fixed top-8 left-0 right-0 z-[1050] border-b transition-all duration-500 ${
+          isScrolled
+            ? 'brand-nav brand-nav-scrolled border-white/10 shadow-[0_18px_60px_rgba(0,0,0,0.28)]'
+            : 'brand-nav border-white/5'
         }`}
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        initial={{ y: -110, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Mobile Menu Toggle */}
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative flex items-center justify-between h-[68px] lg:h-[78px]">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 text-charcoal hover:text-gold transition-colors"
+              className="lg:hidden p-2 -ml-2 text-white/85 hover:text-white transition-colors"
+              aria-label="Open menu"
             >
-              <Menu size={22} />
+              <Menu size={23} />
             </button>
 
-            {/* Navigation Links - Desktop */}
-            <nav className="hidden lg:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className="text-[11px] font-medium tracking-[0.15em] uppercase text-charcoal/80 hover:text-charcoal transition-colors relative group"
-                >
-                  {link.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-gold transition-all duration-300 group-hover:w-full" />
-                </Link>
-              ))}
+            <nav className="hidden lg:flex items-center gap-7 xl:gap-9">
+              {navLinks.map((link) => {
+                const active = location.pathname === link.path || (link.path === '/shop' && location.pathname === '/shop');
+                return (
+                  <Link
+                    key={link.name}
+                    to={link.path}
+                    className={`brand-nav-link relative text-[10px] xl:text-[11px] font-semibold tracking-[0.18em] uppercase ${active ? 'text-white' : 'text-white/65 hover:text-white'}`}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
             </nav>
 
-            {/* Logo */}
-            <Link to="/" className="absolute left-1/2 -translate-x-1/2 lg:relative lg:left-0 lg:translate-x-0">
-              <h1 className="font-display text-xl sm:text-2xl lg:text-2xl font-semibold tracking-[0.08em] text-charcoal">
-                FASHION <span className="text-gradient-gold">2</span> GETHER
-              </h1>
-            </Link>
+            <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 lg:ml-auto lg:mr-auto">
+              <BrandLogo className="w-[150px] sm:w-[175px] lg:w-[205px]" imageClassName="h-[50px] lg:h-[60px]" priority />
+            </div>
 
-            {/* Right Actions */}
-            <div className="flex items-center gap-3 sm:gap-5">
-              <Link to="/search" className="hidden sm:block p-2 text-charcoal/70 hover:text-charcoal transition-colors">
-                <Search size={18} strokeWidth={1.5} />
+            <div className="flex items-center gap-1 sm:gap-2 lg:gap-3">
+              <Link to="/search" className="hidden sm:flex brand-icon-button" aria-label="Search">
+                <Search size={18} strokeWidth={1.7} />
               </Link>
-              <Link to="/account" className="hidden sm:block p-2 text-charcoal/70 hover:text-charcoal transition-colors">
-                <User size={18} strokeWidth={1.5} />
+              <Link to="/account" className="hidden sm:flex brand-icon-button" aria-label="Account">
+                <User size={18} strokeWidth={1.7} />
               </Link>
-              <Link to="/wishlist" className="p-2 text-charcoal/70 hover:text-charcoal transition-colors relative">
-                <Heart size={18} strokeWidth={1.5} />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-burgundy text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                    {wishlistCount}
-                  </span>
-                )}
+              <Link to="/wishlist" className="brand-icon-button relative" aria-label="Wishlist">
+                <Heart size={18} strokeWidth={1.7} />
+                {wishlistCount > 0 && <span className="brand-count-badge">{wishlistCount}</span>}
               </Link>
-              <Link to="/cart" className="p-2 text-charcoal/70 hover:text-charcoal transition-colors relative">
-                <ShoppingBag size={18} strokeWidth={1.5} />
-                {cartCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
+              <Link to="/cart" className="brand-icon-button relative" aria-label="Shopping bag">
+                <ShoppingBag size={18} strokeWidth={1.7} />
+                {cartCount > 0 && <span className="brand-count-badge brand-count-badge-blue">{cartCount}</span>}
               </Link>
             </div>
           </div>
         </div>
       </motion.header>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
             <motion.div
-              className="fixed inset-0 bg-black/50 z-[1100]"
+              className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[1200]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
             />
-            <motion.div
-              className="fixed top-0 left-0 bottom-0 w-[85%] max-w-[380px] bg-cream z-[1200] overflow-y-auto"
+            <motion.aside
+              className="fixed top-0 left-0 bottom-0 w-[88%] max-w-[390px] z-[1250] brand-mobile-menu overflow-y-auto"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 280 }}
             >
-              <div className="p-6">
+              <div className="p-5 sm:p-6 min-h-full flex flex-col">
                 <div className="flex items-center justify-between mb-10">
-                  <h2 className="font-display text-lg tracking-wider">MENU</h2>
-                  <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-charcoal hover:text-gold transition-colors">
-                    <X size={22} />
+                  <BrandLogo className="w-[185px]" imageClassName="h-[58px]" priority />
+                  <button onClick={() => setIsMobileMenuOpen(false)} className="brand-icon-button" aria-label="Close menu">
+                    <X size={21} />
                   </button>
                 </div>
 
-                <nav className="space-y-1">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-white/35 mb-4">Explore</p>
+                <nav className="space-y-0.5">
                   {navLinks.map((link, i) => (
                     <motion.div
                       key={link.name}
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: -24 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 + 0.1 }}
+                      transition={{ delay: i * 0.055 + 0.08 }}
                     >
                       <Link
                         to={link.path}
-                        className="block py-3 text-lg font-display tracking-wide text-charcoal/80 hover:text-charcoal hover:pl-2 transition-all duration-300"
+                        className="group flex items-center justify-between py-3.5 text-[25px] sm:text-[28px] font-display text-white/88 hover:text-white border-b border-white/7"
                       >
                         {link.name}
+                        <ArrowUpRight size={16} className="text-brand-pink opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                       </Link>
                     </motion.div>
                   ))}
                 </nav>
 
-                <div className="mt-10 pt-8 border-t border-charcoal/10">
-                  <div className="space-y-4">
-                    <Link to="/account" className="flex items-center gap-3 text-sm text-charcoal/70 hover:text-charcoal">
-                      <User size={16} /> My Account
-                    </Link>
-                    <Link to="/wishlist" className="flex items-center gap-3 text-sm text-charcoal/70 hover:text-charcoal">
-                      <Heart size={16} /> Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
-                    </Link>
-                    <Link to="/search" className="flex items-center gap-3 text-sm text-charcoal/70 hover:text-charcoal">
-                      <Search size={16} /> Search
-                    </Link>
-                    <Link to="/admin" className="flex items-center gap-3 text-sm text-charcoal/40 hover:text-charcoal/60 mt-4 pt-4 border-t border-charcoal/5">
-                      Admin Panel
-                    </Link>
-                  </div>
+                <div className="grid grid-cols-3 gap-2 mt-8">
+                  <Link to="/search" className="brand-mobile-quick"><Search size={17} /><span>Search</span></Link>
+                  <Link to="/wishlist" className="brand-mobile-quick"><Heart size={17} /><span>Wishlist</span></Link>
+                  <Link to="/account" className="brand-mobile-quick"><User size={17} /><span>Account</span></Link>
                 </div>
 
-                <div className="mt-10 pt-8 border-t border-charcoal/10">
-                  <p className="text-xs text-charcoal/50 tracking-wider uppercase mb-3">Follow Us</p>
-                  <div className="flex gap-4">
-                    <a href="https://instagram.com/fashion2gether" className="text-charcoal/60 hover:text-gold transition-colors text-sm">Instagram</a>
-                    <a href="https://wa.me/919595535339" className="text-charcoal/60 hover:text-gold transition-colors text-sm">WhatsApp</a>
+                <div className="mt-auto pt-10">
+                  <p className="font-elegant italic text-xl text-white/60 mb-4">Wear better. Look better.</p>
+                  <div className="flex gap-5 text-xs tracking-wider">
+                    <a href="https://instagram.com/fashion2gether_" target="_blank" rel="noreferrer" className="text-white/55 hover:text-white">Instagram</a>
+                    <a href="https://wa.me/919595535339" target="_blank" rel="noreferrer" className="text-white/55 hover:text-white">WhatsApp</a>
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </motion.aside>
           </>
         )}
       </AnimatePresence>
