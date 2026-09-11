@@ -1,10 +1,13 @@
-import { useRef, lazy, Suspense } from 'react';
+import { useRef, useState, useEffect, lazy, Suspense } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Play, Star, MapPin, Clock, Phone, Instagram } from 'lucide-react';
 import ProductCard from './ProductCard';
 import Fashion3DSection from './3d/Fashion3DSection';
 import { products, categories, reviews, reels } from '../data/products';
+import { productService } from '../services/productService';
+import { transformProductsForCards } from '../utils/productTransform';
+import type { Product as CardProduct } from '../data/products';
 
 // Section Header Component
 function SectionHeader({ title, subtitle, align = 'center' }: { title: string; subtitle?: string; align?: 'center' | 'left' }) {
@@ -28,6 +31,17 @@ function SectionHeader({ title, subtitle, align = 'center' }: { title: string; s
 // NEW DROP SECTION
 export function NewDropSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [newProducts, setNewProducts] = useState<CardProduct[]>([]);
+
+  useEffect(() => {
+    productService.getAll({ trending: true, status: 'active' }).then((dbProducts) => {
+      const cardProducts = transformProductsForCards(dbProducts).slice(0, 8);
+      setNewProducts(cardProducts);
+    }).catch(() => {
+      // Fallback to demo data if Supabase fails
+      setNewProducts(products.filter(p => p.badge === 'NEW' || p.badge === 'TRENDING'));
+    });
+  }, []);
 
   const scroll = (dir: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -35,8 +49,6 @@ export function NewDropSection() {
       scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
     }
   };
-
-  const newProducts = products.filter(p => p.badge === 'NEW' || p.badge === 'TRENDING');
 
   return (
     <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto">
@@ -126,7 +138,17 @@ export function ShopByCategorySection() {
 
 // TRENDING NOW
 export function TrendingSection() {
-  const trendingProducts = products.filter(p => p.badge === 'TRENDING' || p.badge === 'BESTSELLER');
+  const [trendingProducts, setTrendingProducts] = useState<CardProduct[]>([]);
+
+  useEffect(() => {
+    productService.getAll({ trending: true, status: 'active' }).then((dbProducts) => {
+      const cardProducts = transformProductsForCards(dbProducts).slice(0, 8);
+      setTrendingProducts(cardProducts);
+    }).catch(() => {
+      // Fallback to demo data
+      setTrendingProducts(products.filter(p => p.badge === 'TRENDING' || p.badge === 'BESTSELLER'));
+    });
+  }, []);
 
   return (
     <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto">
@@ -488,7 +510,17 @@ export function SaleSection() {
 
 // BEST SELLERS
 export function BestSellersSection() {
-  const bestSellers = products.filter(p => p.badge === 'BESTSELLER');
+  const [bestSellers, setBestSellers] = useState<CardProduct[]>([]);
+
+  useEffect(() => {
+    productService.getAll({ bestseller: true, status: 'active' }).then((dbProducts) => {
+      const cardProducts = transformProductsForCards(dbProducts).slice(0, 8);
+      setBestSellers(cardProducts);
+    }).catch(() => {
+      // Fallback to demo data
+      setBestSellers(products.filter(p => p.badge === 'BESTSELLER'));
+    });
+  }, []);
 
   return (
     <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto">

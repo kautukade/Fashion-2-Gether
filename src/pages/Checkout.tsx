@@ -75,11 +75,9 @@ export default function Checkout() {
     setLoading(true);
     setError('');
 
-    const orderNumber = generateOrderNumber();
-
-    // If Supabase is not configured, create a local order
+    // If Supabase is not configured, create a local order (demo mode)
     if (!isSupabaseConfigured() || !supabase) {
-      // Store order locally
+      const orderNumber = generateOrderNumber();
       const orders = JSON.parse(localStorage.getItem('f2g-orders') || '[]');
       orders.push({
         order_number: orderNumber,
@@ -98,74 +96,44 @@ export default function Checkout() {
     }
 
     try {
-      // Create customer if not exists
-      let customerId = '';
-      if (user) {
-        const { data: customer } = await supabase.from('customers').select('id').eq('user_id', user.id).single();
-        if (customer) customerId = customer.id;
-        else {
-          const { data: newCustomer } = await supabase.from('customers').insert({
-            user_id: user.id,
-            email: form.email,
-            phone: form.phone,
-            first_name: form.firstName,
-            last_name: form.lastName,
-          }).select().single();
-          customerId = newCustomer?.id || '';
-        }
-      } else {
-        // Guest checkout - create a temporary customer
-        const userId = (user as any)?.id || '00000000-0000-0000-0000-000000000000';
-        const result = await supabase.from('customers').insert({
-          user_id: userId,
-          email: form.email,
-          phone: form.phone,
-          first_name: form.firstName,
-          last_name: form.lastName,
-        }).select().single();
-        const newCustomer = result.data as any;
-        customerId = newCustomer?.id || '';
+      // Prepare items for secure order creation
+      const orderItems = items.map(item => ({
+        variant_id: item.variantId,
+        quantity: item.quantity,
+      }));
+
+      // Prepare shipping address
+      const shippingAddress = {
+        first_name: form.firstName,
+        last_name: form.lastName,
+        phone: form.phone,
+        address: form.address,
+        city: form.city,
+        state: form.state,
+        pincode: form.pincode,
+        landmark: form.landmark,
+      };
+
+      // Call secure order creation function
+      // This function validates stock, calculates prices server-side, and creates order atomically
+      const { data: orderResult, error: orderError } = await supabase.rpc('create_secure_order', {
+        p_guest_email: user ? null : form.email,
+        p_guest_phone: user ? null : form.phone,
+        p_customer_id: user ? user.id : null,
+        p_items: orderItems,
+        p_shipping_address: shippingAddress,
+        p_payment_method: form.paymentMethod,
+      });
+
+      if (orderError) {
+        throw new Error(orderError.message || 'Failed to create order');
       }
 
-      // Create order
-      const { data: orderData, error: orderError } = await supabase.from('orders').insert({
-        order_number: orderNumber,
-        customer_id: customerId,
-        status: 'pending',
-        subtotal,
-        shipping_cost: shipping,
-        discount: 0,
-        total,
-        payment_status: 'pending',
-        payment_method: form.paymentMethod,
-        shipping_address: {
-          first_name: form.firstName,
-          last_name: form.lastName,
-          phone: form.phone,
-          address: form.address,
-          city: form.city,
-          state: form.state,
-          pincode: form.pincode,
-          landmark: form.landmark,
-        },
-      }).select().single();
-
-      if (orderError) throw new Error(orderError.message);
-      const order = orderData as any;
-
-      // Create order items
-      for (const item of items) {
-        await supabase.from('order_items').insert({
-          order_id: order.id,
-          product_id: item.productId,
-          variant_id: item.variantId,
-          quantity: item.quantity,
-          price: item.price,
-        });
-
-        // Decrease inventory
-        await supabase.rpc('decrement_stock', { variant_id_param: item.variantId, quantity_param: item.quantity });
+      if (!orderResult) {
+        throw new Error('Order creation failed');
       }
+
+      const orderNumber = orderResult.order_number;
 
       clearCart();
       navigate(`/order-success/${orderNumber}`);

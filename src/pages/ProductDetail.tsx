@@ -1,53 +1,135 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingBag, Star, ChevronRight, Truck, RotateCcw, Shield, Minus, Plus, Share2, Check } from 'lucide-react';
-import { products } from '../data/products';
+import { productService } from '../services/productService';
+import { transformProductForCard } from '../utils/productTransform';
 import ProductCard from '../components/ProductCard';
 import { useCartStore } from '../contexts/cartStore';
 import { useWishlistStore } from '../contexts/wishlistStore';
+import type { Product as CardProduct } from '../data/products';
+import type { ProductVariant } from '../types/database';
 
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const product = products.find(p => p.slug === slug) || products[0];
+  
+  const [product, setProduct] = useState<CardProduct | null>(null);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
+  const [relatedProducts, setRelatedProducts] = useState<CardProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
+  const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [addedToCart, setAddedToCart] = useState(false);
   const [showSizeError, setShowSizeError] = useState(false);
+  const [stockError, setStockError] = useState('');
 
   const addItem = useCartStore((s) => s.addItem);
-  const isWishlisted = useWishlistStore((s) => s.isWishlisted(product.id));
+  const isWishlisted = useWishlistStore((s) => s.isWishlisted(product?.id || ''));
   const toggleWishlist = useWishlistStore((s) => s.toggleItem);
 
+  useEffect(() => {
+    loadProduct();
+  }, [slug]);
+
+  const loadProduct = async () => {
+    if (!slug) return;
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const dbProduct = await productService.getBySlug(slug);
+      if (!dbProduct) {
+        setError('Product not found');
+        setLoading(false);
+        return;
+      }
+
+      // Transform to card format
+      const cardProduct = transformProductForCard(dbProduct);
+      setProduct(cardProduct);
+
+      // Fetch variants
+      const productVariants = await productService.getVariants(dbProduct.id);
+      setVariants(productVariants);
+
+      // Set default color and size from first available variant
+      if (productVariants.length > 0) {
+        setSelectedColor(productVariants[0].color);
+        setSelectedSize(productVariants[0].size);
+      }
+
+      // Fetch related products (same category)
+      if (dbProduct.category_id) {
+        const related = await productService.getAll({
+          category: dbProduct.category_id,
+          status: 'active'
+        });
+        const relatedCards = related
+          .filter(p => p.id !== dbProduct.id)
+          .slice(0, 4)
+          .map(transformProductForCard);
+        setRelatedProducts(relatedCards);
+      }
+    } catch (err) {
+      setError('Failed to load product');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get available sizes for selected color
+  const availableSizes = variants
+    .filter(v => v.color === selectedColor && v.stock_quantity > 0)
+    .map(v => v.size);
+
+  // Get available colors
+  const availableColors = [...new Set(variants.filter(v => v.stock_quantity > 0).map(v => v.color))];
+
+  // Get selected variant
+  const selectedVariant = variants.find(
+    v => v.color === selectedColor && v.size === selectedSize
+  );
+
   const handleAddToCart = () => {
-    if (!selectedSize) {
+    if (!product || !selectedVariant) {
       setShowSizeError(true);
       return;
     }
+
+    if (selectedVariant.stock_quantity < quantity) {
+      setStockError(`Only ${selectedVariant.stock_quantity} items available`);
+      return;
+    }
+
     setShowSizeError(false);
+    setStockError('');
+    
     addItem({
       productId: product.id,
-      variantId: `${product.id}-${selectedColor}-${selectedSize}`,
+      variantId: selectedVariant.id,
       name: product.name,
       image: product.images[0],
       color: selectedColor,
       size: selectedSize,
-      price: product.price,
+      price: selectedVariant.price_override || product.price,
       mrp: product.mrp,
       quantity,
       slug: product.slug,
     });
+    
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
 
   const handleBuyNow = () => {
-    if (!selectedSize) {
+    if (!selectedVariant) {
       setShowSizeError(true);
       return;
     }
@@ -55,9 +137,35 @@ export default function ProductDetail() {
     navigate('/checkout');
   };
 
-  const discount = Math.round(((product.mrp - product.price) / product.mrp) * 100);
+  if (loading) {
+    return (
+      <main className="page-transition pt-28 sm:pt-32 pb-20 lg:pb-10 min-h-screen">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 animate-pulse">
+            <div className="aspect-[3/4] bg-gray-200 rounded-sm"></div>
+            <div className="space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-20 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
-  const relatedProducts = products.filter(p => p.id !== product.id && p.category === product.category).slice(0, 4);
+  if (error || !product) {
+    return (
+      <main className="page-transition pt-28 sm:pt-32 pb-20 lg:pb-10 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 text-lg mb-4">{error || 'Product not found'}</p>
+          <Link to="/shop" className="btn-primary">Back to Shop</Link>
+        </div>
+      </main>
+    );
+  }
+
+  const discount = Math.round(((product.mrp - product.price) / product.mrp) * 100);
 
   return (
     <main className="page-transition pt-28 sm:pt-32 pb-20 lg:pb-10 min-h-screen">
@@ -154,10 +262,19 @@ export default function ProductDetail() {
                 Color: <span className="font-normal text-charcoal/60">{selectedColor}</span>
               </p>
               <div className="flex gap-2">
-                {product.colors.map((color) => (
+                {availableColors.map((color) => (
                   <button
                     key={color}
-                    onClick={() => setSelectedColor(color)}
+                    onClick={() => {
+                      setSelectedColor(color);
+                      // Reset size when color changes
+                      const firstAvailableSize = variants.find(v => v.color === color && v.stock_quantity > 0)?.size;
+                      if (firstAvailableSize) {
+                        setSelectedSize(firstAvailableSize);
+                      } else {
+                        setSelectedSize('');
+                      }
+                    }}
                     className={`w-8 h-8 rounded-full border-2 transition-all ${
                       selectedColor === color ? 'border-gold scale-110' : 'border-charcoal/10 hover:border-charcoal/30'
                     }`}
@@ -189,20 +306,33 @@ export default function ProductDetail() {
                 <button className="text-xs text-gold hover:underline">Size Guide</button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`min-w-[44px] h-11 px-3 border rounded-sm text-sm transition-all ${
-                      selectedSize === size
-                        ? 'bg-charcoal text-white border-charcoal'
-                        : 'border-charcoal/20 text-charcoal hover:border-charcoal'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+                {product.sizes.map((size) => {
+                  const isAvailable = availableSizes.includes(size);
+                  return (
+                    <button
+                      key={size}
+                      onClick={() => isAvailable && setSelectedSize(size)}
+                      disabled={!isAvailable}
+                      className={`min-w-[44px] h-11 px-3 border rounded-sm text-sm transition-all ${
+                        !isAvailable
+                          ? 'border-charcoal/10 text-charcoal/30 cursor-not-allowed line-through'
+                          : selectedSize === size
+                          ? 'bg-charcoal text-white border-charcoal'
+                          : 'border-charcoal/20 text-charcoal hover:border-charcoal'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  );
+                })}
               </div>
+              {selectedVariant && (
+                <p className="text-xs text-charcoal/50 mt-2">
+                  {selectedVariant.stock_quantity > 0 
+                    ? `${selectedVariant.stock_quantity} in stock`
+                    : 'Out of stock'}
+                </p>
+              )}
             </div>
 
             {/* Quantity */}
@@ -217,12 +347,21 @@ export default function ProductDetail() {
                 </button>
                 <span className="w-12 text-center text-sm font-medium">{quantity}</span>
                 <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 flex items-center justify-center hover:bg-charcoal/5 transition-colors"
+                  onClick={() => {
+                    const maxStock = selectedVariant?.stock_quantity || 99;
+                    if (quantity < maxStock) {
+                      setQuantity(quantity + 1);
+                    }
+                  }}
+                  disabled={selectedVariant ? quantity >= selectedVariant.stock_quantity : false}
+                  className="w-10 h-10 flex items-center justify-center hover:bg-charcoal/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <Plus size={14} />
                 </button>
               </div>
+              {selectedVariant && quantity >= selectedVariant.stock_quantity && (
+                <p className="text-xs text-orange-600 mt-2">Maximum stock reached</p>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -230,6 +369,13 @@ export default function ProductDetail() {
             {showSizeError && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-sm text-sm text-red-700">
                 Please select a size before adding to bag.
+              </div>
+            )}
+
+            {/* Stock Error */}
+            {stockError && (
+              <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-sm text-sm text-orange-700">
+                {stockError}
               </div>
             )}
 
