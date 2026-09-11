@@ -16,7 +16,7 @@ export default function BrandLogo({
   const logo = (
     <div className={`brand-logo-shell ${className}`}>
       <img
-        src="/brand/fashion2gether-logo.jpg"
+        src="/brand/fashion2gether-logo-wide.jpg"
         alt="Fashion 2 Gether — Wear better. Look better"
         className={`brand-logo-image ${imageClassName}`}
         loading={priority ? 'eager' : 'lazy'}
