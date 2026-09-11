@@ -95,13 +95,24 @@ export function NewDropSection() {
 
 // SHOP BY CATEGORY
 export function ShopByCategorySection() {
+  const [dbCategories, setDbCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    productService.getCategories().then(cats => {
+      setDbCategories(cats);
+    }).catch(() => {
+      // Fallback to demo categories
+      setDbCategories(categories);
+    });
+  }, []);
+
   return (
     <section className="py-16 sm:py-24 bg-off-white">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader title="Shop By Category" subtitle="Curated Collections" />
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
-          {categories.map((cat, i) => (
+          {dbCategories.map((cat, i) => (
             <motion.div
               key={cat.id}
               className="group relative overflow-hidden rounded-sm cursor-pointer"
@@ -110,10 +121,10 @@ export function ShopByCategorySection() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.5 }}
             >
-              <Link to={`/shop?category=${cat.slug}`}>
+              <Link to={`/shop?category=${cat.id}`}>
                 <div className={`relative ${i === 0 || i === 3 ? 'aspect-[3/4]' : 'aspect-[4/5]'} overflow-hidden`}>
                   <img
-                    src={cat.image}
+                    src={cat.image_url || cat.image || 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&h=1000&fit=crop'}
                     alt={cat.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     loading="lazy"

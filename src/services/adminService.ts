@@ -45,6 +45,30 @@ export const adminService = {
     return data || [];
   },
 
+  async deleteVariantsByProduct(productId: string) {
+    if (!isSupabaseConfigured() || !supabase) return { error: 'Supabase not configured' };
+    const { error } = await supabase.from('product_variants').delete().eq('product_id', productId);
+    return { error: error?.message ?? null };
+  },
+
+  async createMedia(media: Record<string, unknown>) {
+    if (!isSupabaseConfigured() || !supabase) return { data: null, error: 'Supabase not configured' };
+    const { data, error } = await supabase.from('product_media').insert(media).select().single();
+    return { data, error: error?.message ?? null };
+  },
+
+  async getMediaByProduct(productId: string) {
+    if (!isSupabaseConfigured() || !supabase) return [];
+    const { data } = await supabase.from('product_media').select('*').eq('product_id', productId).order('sort_order');
+    return data || [];
+  },
+
+  async deleteMedia(id: string) {
+    if (!isSupabaseConfigured() || !supabase) return { error: 'Supabase not configured' };
+    const { error } = await supabase.from('product_media').delete().eq('id', id);
+    return { error: error?.message ?? null };
+  },
+
   async getCategories() {
     if (!isSupabaseConfigured() || !supabase) return [];
     const { data } = await supabase.from('categories').select('*').order('sort_order');

@@ -26,6 +26,9 @@ export default function AdminProductForm() {
     { color: '', size: '', sku: '', stock_quantity: 0, low_stock_threshold: 5, price_override: null, status: 'active' }
   ]);
 
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [existingMedia, setExistingMedia] = useState<any[]>([]);
+
   useEffect(() => {
     Promise.all([adminService.getCategories(), adminService.getCollections()]).then(([cats, cols]) => {
       setCategories(cats);
@@ -52,6 +55,9 @@ export default function AdminProductForm() {
         adminService.getVariantsByProduct(id).then((v) => {
           if (v.length > 0) setVariants(v);
         });
+        adminService.getMediaByProduct(id).then((m) => {
+          if (m.length > 0) setExistingMedia(m);
+        });
         setLoading(false);
       });
     }
@@ -64,18 +70,87 @@ export default function AdminProductForm() {
       setError('Name and selling price are required');
       return;
     }
+
+    // Validate variants
+    const validVariants = variants.filter(v => v.color && v.size && v.sku);
+    if (validVariants.length === 0) {
+      setError('At least one valid variant is required (color, size, and SKU)');
+      return;
+    }
+
+    // Check for duplicate SKUs
+    const skus = validVariants.map(v => v.sku);
+    const uniqueSkus = new Set(skus);
+    if (skus.length !== uniqueSkus.size) {
+      setError('Duplicate SKU found. Each variant must have a unique SKU.');
+      return;
+    }
+
     setSaving(true);
     setError('');
 
     try {
+      let productId = id;
+
       if (id) {
+        // Update existing product
         const { error: err } = await adminService.updateProduct(id, form);
         if (err) throw new Error(err);
+
+        // Delete existing variants and recreate
+        await adminService.deleteVariantsByProduct(id);
       } else {
+        // Create new product
         const { data, error: err } = await adminService.createProduct(form);
         if (err) throw new Error(err);
-        if (data) navigate(`/admin/products/${data.id}`);
+        if (!data) throw new Error('Failed to create product');
+        productId = data.id;
       }
+
+      // Save all variants
+      for (const variant of validVariants) {
+        const { error: variantError } = await adminService.createVariant({
+          product_id: productId,
+          color: variant.color,
+          size: variant.size,
+          sku: variant.sku,
+          stock_quantity: variant.stock_quantity || 0,
+          low_stock_threshold: variant.low_stock_threshold || 5,
+          price_override: variant.price_override,
+          status: variant.status || 'active',
+        });
+
+        if (variantError) {
+          throw new Error(`Failed to save variant ${variant.sku}: ${variantError}`);
+        }
+      }
+
+      // Save media if any
+      if (mediaFiles.length > 0) {
+        for (let i = 0; i < mediaFiles.length; i++) {
+          const file = mediaFiles[i];
+          const path = `${productId}/${Date.now()}-${file.name}`;
+          const bucket = file.type.startsWith('video/') ? 'product-videos' : 'product-images';
+          
+          const { url, error: uploadError } = await adminService.uploadFile(bucket, path, file);
+          if (uploadError) {
+            throw new Error(`Failed to upload ${file.name}: ${uploadError}`);
+          }
+
+          const { error: mediaError } = await adminService.createMedia({
+            product_id: productId,
+            type: file.type.startsWith('video/') ? 'video' : 'image',
+            url: url!,
+            sort_order: i,
+            alt_text: form.name,
+          });
+
+          if (mediaError) {
+            throw new Error(`Failed to save media record: ${mediaError}`);
+          }
+        }
+      }
+
       navigate('/admin/products');
     } catch (e: any) {
       setError(e.message || 'Failed to save');
@@ -183,6 +258,79 @@ export default function AdminProductForm() {
               <button onClick={() => removeVariant(i)} className="text-red-500 hover:text-red-700 flex items-center justify-center"><Trash2 size={14} /></button>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Product Media Section */}
+      <div className="bg-white rounded-sm border border-gray-100 p-6 mt-6">
+        <h2 className="text-lg font-medium text-charcoal mb-4">Product Media</h2>
+        
+        {/* Existing Media */}
+        {existingMedia.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs font-medium text-gray-600 mb-2">Current Media</p>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+              {existingMedia.map((media) => (
+                <div key={media.id} className="relative aspect-square bg-gray-100 rounded-sm overflow-hidden group">
+                  {media.type === 'image' ? (
+                    <img src={media.url} alt={media.alt_text || ''} className="w-full h-full object-cover" />
+                  ) : (
+                    <video src={media.url} className="w-full h-full object-cover" />
+                  )}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      onClick={async () => {
+                        if (confirm('Delete this media?')) {
+                          await adminService.deleteMedia(media.id);
+                          setExistingMedia(existingMedia.filter(m => m.id !== media.id));
+                        }
+                      }}
+                      className="text-white hover:text-red-300"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Upload New Media */}
+        <div>
+          <p className="text-xs font-medium text-gray-600 mb-2">Upload New Media</p>
+          <input
+            type="file"
+            multiple
+            accept="image/*,video/*"
+            onChange={(e) => {
+              const files = Array.from(e.target.files || []);
+              setMediaFiles([...mediaFiles, ...files]);
+            }}
+            className="w-full px-3 py-2 border border-gray-200 rounded-sm text-sm focus:outline-none focus:border-gold"
+          />
+          {mediaFiles.length > 0 && (
+            <div className="mt-3">
+              <p className="text-xs text-gray-500 mb-2">{mediaFiles.length} file(s) selected</p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                {mediaFiles.map((file, i) => (
+                  <div key={i} className="relative aspect-square bg-gray-100 rounded-sm overflow-hidden">
+                    {file.type.startsWith('image/') ? (
+                      <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <video src={URL.createObjectURL(file)} className="w-full h-full object-cover" />
+                    )}
+                    <button
+                      onClick={() => setMediaFiles(mediaFiles.filter((_, idx) => idx !== i))}
+                      className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
