@@ -20,22 +20,20 @@ export default function TrackOrder() {
       return;
     }
 
-    const { data, error: err } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('order_number', orderNumber)
-      .single();
+    // Use secure RPC function for order tracking
+    const { data, error: err } = await supabase.rpc('track_order_by_phone', {
+      p_order_number: orderNumber,
+      p_phone: phone,
+    });
 
-    if (err || !data) {
-      setError('Order not found. Please check your order number.');
+    if (err) {
+      setError('Failed to track order. Please try again.');
       setLoading(false);
       return;
     }
 
-    // Verify phone matches
-    const address = data.shipping_address as any;
-    if (address?.phone && address.phone.replace(/\s/g, '') !== phone.replace(/\s/g, '')) {
-      setError('Phone number does not match this order.');
+    if (!data) {
+      setError('Order not found. Please check your order number and phone.');
       setLoading(false);
       return;
     }
