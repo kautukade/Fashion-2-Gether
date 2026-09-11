@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Heart, Search, Menu, X, User } from 'lucide-react';
+import { useCartStore } from '../contexts/cartStore';
+import { useWishlistStore } from '../contexts/wishlistStore';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [cartCount] = useState(2);
   const location = useLocation();
+  const cartCount = useCartStore((s) => s.getItemCount());
+  const wishlistCount = useWishlistStore((s) => s.getCount());
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -96,6 +99,11 @@ export default function Navbar() {
               </Link>
               <Link to="/wishlist" className="p-2 text-charcoal/70 hover:text-charcoal transition-colors relative">
                 <Heart size={18} strokeWidth={1.5} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-burgundy text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
               <Link to="/cart" className="p-2 text-charcoal/70 hover:text-charcoal transition-colors relative">
                 <ShoppingBag size={18} strokeWidth={1.5} />
@@ -131,10 +139,7 @@ export default function Navbar() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-10">
                   <h2 className="font-display text-lg tracking-wider">MENU</h2>
-                  <button
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 text-charcoal hover:text-gold transition-colors"
-                  >
+                  <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-charcoal hover:text-gold transition-colors">
                     <X size={22} />
                   </button>
                 </div>
@@ -163,10 +168,13 @@ export default function Navbar() {
                       <User size={16} /> My Account
                     </Link>
                     <Link to="/wishlist" className="flex items-center gap-3 text-sm text-charcoal/70 hover:text-charcoal">
-                      <Heart size={16} /> Wishlist
+                      <Heart size={16} /> Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
                     </Link>
                     <Link to="/search" className="flex items-center gap-3 text-sm text-charcoal/70 hover:text-charcoal">
                       <Search size={16} /> Search
+                    </Link>
+                    <Link to="/admin" className="flex items-center gap-3 text-sm text-charcoal/40 hover:text-charcoal/60 mt-4 pt-4 border-t border-charcoal/5">
+                      Admin Panel
                     </Link>
                   </div>
                 </div>
@@ -174,9 +182,8 @@ export default function Navbar() {
                 <div className="mt-10 pt-8 border-t border-charcoal/10">
                   <p className="text-xs text-charcoal/50 tracking-wider uppercase mb-3">Follow Us</p>
                   <div className="flex gap-4">
-                    <a href="#" className="text-charcoal/60 hover:text-gold transition-colors text-sm">Instagram</a>
-                    <a href="#" className="text-charcoal/60 hover:text-gold transition-colors text-sm">Facebook</a>
-                    <a href="#" className="text-charcoal/60 hover:text-gold transition-colors text-sm">WhatsApp</a>
+                    <a href="https://instagram.com/fashion2gether" className="text-charcoal/60 hover:text-gold transition-colors text-sm">Instagram</a>
+                    <a href="https://wa.me/919595535339" className="text-charcoal/60 hover:text-gold transition-colors text-sm">WhatsApp</a>
                   </div>
                 </div>
               </div>

@@ -138,7 +138,7 @@ function PolicyPage({ title }: { title: string }) {
             <li>Delivery typically takes 5-7 business days</li>
             <li>Easy returns within 7 days of delivery</li>
           </ul>
-          <p className="mt-6">For any questions regarding our policies, please contact us at hello@fashion2gether.com or call us at +91 98765 43210.</p>
+          <p className="mt-6">For any questions regarding our policies, please contact us at hello@fashion2gether.com or call us at +91 95955 35339.</p>
         </div>
       </div>
     </main>

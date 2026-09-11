@@ -56,7 +56,7 @@ export default function Checkout() {
                     </div>
                     <div>
                       <label className="text-xs font-semibold tracking-[0.15em] uppercase text-charcoal block mb-2">Phone Number</label>
-                      <input type="tel" placeholder="+91 98765 43210" className="w-full px-4 py-3 border border-charcoal/15 rounded-sm text-sm focus:outline-none focus:border-gold" />
+                      <input type="tel" placeholder="+91 95955 35339" className="w-full px-4 py-3 border border-charcoal/15 rounded-sm text-sm focus:outline-none focus:border-gold" />
                     </div>
                     <div className="flex items-center gap-2 pt-2">
                       <input type="checkbox" id="offers" className="w-4 h-4 accent-gold" />
