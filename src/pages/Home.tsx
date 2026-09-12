@@ -1,35 +1,29 @@
 import Hero from '../components/Hero';
 import {
-  NewDropSection,
-  ShopByCategorySection,
-  TrendingSection,
-  InteractiveSection,
-  ShopTheReelSection,
-  BestSellersSection,
-  EditorialSection,
-  SaleSection,
-  CompleteTheLookSection,
-  ReviewsSection,
-  StoreSection,
-  NewsletterSection,
+  FeaturedCollection,
+  CategoryShowcase,
+  NewArrivals,
+  BrandExperience,
+  BestSellers,
+  EditorialCampaign,
+  CustomerTestimonials,
+  StoreVisit,
+  Newsletter,
 } from '../components/Sections';
 
 export default function Home() {
   return (
-    <main className="page-transition">
+    <main className="page-transition bg-cream">
       <Hero />
-      <NewDropSection />
-      <ShopByCategorySection />
-      <TrendingSection />
-      <InteractiveSection />
-      <ShopTheReelSection />
-      <BestSellersSection />
-      <EditorialSection />
-      <SaleSection />
-      <CompleteTheLookSection />
-      <ReviewsSection />
-      <StoreSection />
-      <NewsletterSection />
+      <FeaturedCollection />
+      <CategoryShowcase />
+      <NewArrivals />
+      <BrandExperience />
+      <BestSellers />
+      <EditorialCampaign />
+      <CustomerTestimonials />
+      <StoreVisit />
+      <Newsletter />
     </main>
   );
 }
