@@ -1,5 +1,69 @@
+# Dependencies
 node_modules/
-.next/
+.pnp
+.pnp.js
+
+# Build outputs
 dist/
 build/
+.next/
+out/
+
+# Environment variables (NEVER commit secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Supabase
+.supabase/
+functions/*/dist/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Misc
+.cache/
+.temp/
+temp/
+tmp/
+
+# Supabase Edge Functions build artifacts
+supabase/functions/*/node_modules/
+supabase/functions/*/.cache/
+
+# Vite
+*.local
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
