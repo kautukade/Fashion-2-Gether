@@ -1,200 +1,190 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, ChevronDown, Play } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Instagram } from 'lucide-react';
 import BrandLogo from './BrandLogo';
 
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [videoReady, setVideoReady] = useState(false);
 
   useEffect(() => {
     const finePointer = window.matchMedia('(pointer: fine)').matches;
-    if (!finePointer) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!finePointer || reducedMotion) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const onMove = (event: MouseEvent) => {
       if (!heroRef.current) return;
       const rect = heroRef.current.getBoundingClientRect();
-      setMousePos({
-        x: (e.clientX - rect.left) / rect.width - 0.5,
-        y: (e.clientY - rect.top) / rect.height - 0.5,
+      setMouse({
+        x: (event.clientX - rect.left) / rect.width - 0.5,
+        y: (event.clientY - rect.top) / rect.height - 0.5,
       });
     };
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+
+    window.addEventListener('mousemove', onMove, { passive: true });
+    return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
-  const titleVariants = {
-    hidden: { opacity: 0, y: 70, rotateX: 12 },
-    visible: (delay: number) => ({
-      opacity: 1,
-      y: 0,
-      rotateX: 0,
-      transition: { delay, duration: 0.95, ease: [0.16, 1, 0.3, 1] },
-    }),
-  };
-
   return (
-    <section ref={heroRef} className="brand-hero relative w-full overflow-hidden pt-[100px]">
-      <div className="absolute inset-0">
+    <section ref={heroRef} className="f2g-noorvi-hero" aria-label="Fashion 2 Gether new season">
+      <div className="hero-film" aria-hidden>
         <video
-          className="hero-background-media absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
           autoPlay
           muted
           loop
           playsInline
-          poster="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=2000&h=1300&fit=crop&q=88"
-          onLoadedData={() => setVideoLoaded(true)}
-          onError={() => setVideoLoaded(false)}
-          style={{ opacity: videoLoaded ? 0.72 : 0 }}
+          poster="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=2000&h=1400&fit=crop&q=90"
+          onLoadedData={() => setVideoReady(true)}
+          onError={() => setVideoReady(false)}
+          style={{ opacity: videoReady ? 1 : 0 }}
         >
           <source media="(max-width: 767px)" src="/videos/hero-mobile.mp4" type="video/mp4" />
           <source src="/videos/hero-desktop.mp4" type="video/mp4" />
         </video>
-
-        <motion.div
-          className="hero-background-media absolute inset-0 bg-cover bg-center"
-          animate={{ scale: 1.055, x: mousePos.x * -10, y: mousePos.y * -7 }}
-          transition={{ type: 'spring', stiffness: 35, damping: 28 }}
-          style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=2000&h=1300&fit=crop&q=88)',
-            opacity: videoLoaded ? 0.2 : 0.86,
-          }}
+        <motion.img
+          src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=2000&h=1400&fit=crop&q=90"
+          alt=""
+          animate={{ scale: 1.055, x: mouse.x * -14, y: mouse.y * -9 }}
+          transition={{ type: 'spring', stiffness: 34, damping: 24 }}
+          style={{ opacity: videoReady ? 0.16 : 1 }}
         />
       </div>
 
-      <div className="hero-mesh" />
-      <div className="hero-orb hero-orb-pink z-[3]" />
-      <div className="hero-orb hero-orb-blue z-[3]" />
+      <motion.div
+        className="f2g-float-card one hidden lg:block"
+        animate={{ x: mouse.x * -42, y: mouse.y * -28 }}
+        transition={{ type: 'spring', stiffness: 42, damping: 20 }}
+        aria-hidden
+      >
+        <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=700&h=950&fit=crop&q=88" alt="" />
+        <div className="f2g-float-label">NEW SEASON • F2G EDIT</div>
+      </motion.div>
 
-      <div className="absolute z-[4] left-[8%] top-[22%] hidden xl:block w-px h-[150px] bg-gradient-to-b from-transparent via-white/30 to-transparent" />
-      <div className="absolute z-[4] right-[7%] bottom-[20%] hidden xl:block w-px h-[130px] bg-gradient-to-b from-transparent via-white/25 to-transparent" />
+      <motion.div
+        className="f2g-float-card two hidden xl:block"
+        animate={{ x: mouse.x * 34, y: mouse.y * 24 }}
+        transition={{ type: 'spring', stiffness: 40, damping: 21 }}
+        aria-hidden
+      >
+        <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=650&h=900&fit=crop&q=88" alt="" />
+        <div className="f2g-float-label">TRENDING • SHOP THE LOOK</div>
+      </motion.div>
 
-      <div className="relative z-10 max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 min-h-[calc(100svh-100px)] flex items-center py-12 sm:py-16 lg:py-20">
-        <div className="grid lg:grid-cols-[1.04fr_.96fr] gap-10 lg:gap-12 xl:gap-20 items-center w-full">
-          <div className="text-center lg:text-left max-w-4xl mx-auto lg:mx-0">
-            <motion.div
-              className="hero-kicker mb-5 sm:mb-7"
-              initial={{ opacity: 0, y: 14 }}
+      <div className="f2g-orbit-badge hidden xl:block" aria-hidden>
+        <svg viewBox="0 0 120 120" className="w-full h-full">
+          <defs>
+            <path id="f2g-circle" d="M 60,60 m -46,0 a 46,46 0 1,1 92,0 a 46,46 0 1,1 -92,0" />
+          </defs>
+          <text>
+            <textPath href="#f2g-circle">FASHION 2 GETHER • YAVATMAL • NEW SEASON • </textPath>
+          </text>
+        </svg>
+        <div className="center">✦</div>
+      </div>
+
+      <div className="hero-content">
+        <div className="hero-copy">
+          <motion.p
+            className="f2g-hero-location"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.7 }}
+          >
+            Yavatmal • All India Shipping
+          </motion.p>
+
+          <h1 className="f2g-hero-title" aria-label="Fashion 2 Gether">
+            <motion.span
+              className="block"
+              initial={{ opacity: 0, y: 70 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.18, duration: 0.7 }}
+              transition={{ delay: 0.26, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             >
-              <span className="hero-kicker-dot" />
-              <span className="text-[9px] sm:text-[10px] font-semibold tracking-[0.24em] uppercase">Yavatmal • All India Shipping</span>
-            </motion.div>
-
-            <div className="perspective-[1200px]">
-              <motion.h1
-                className="font-display text-white text-[clamp(3.35rem,8vw,8.6rem)] leading-[0.78] tracking-[-0.045em]"
-                custom={0.32}
-                variants={titleVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                FASHION
-              </motion.h1>
-              <motion.h2
-                className="font-display brand-gradient-text text-[clamp(3.2rem,7.7vw,8.2rem)] leading-[0.88] tracking-[-0.035em] mt-1"
-                custom={0.46}
-                variants={titleVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                2 GETHER
-              </motion.h2>
-            </div>
-
-            <motion.div
-              className="mt-7 sm:mt-9 flex flex-col lg:flex-row lg:items-end gap-4 lg:gap-8"
-              initial={{ opacity: 0, y: 24 }}
+              Fashion
+            </motion.span>
+            <motion.span
+              className="line2"
+              initial={{ opacity: 0, y: 60 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.78, duration: 0.8 }}
+              transition={{ delay: 0.38, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             >
-              <p className="font-elegant italic text-white/90 text-2xl sm:text-3xl leading-none">Wear better. Look better.</p>
-              <p className="text-white/50 text-xs sm:text-sm leading-relaxed max-w-md mx-auto lg:mx-0">
-                A cinematic digital flagship for new drops, statement looks and the styles everyone is talking about.
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 mt-8 sm:mt-10"
-              initial={{ opacity: 0, y: 24 }}
+              2
+            </motion.span>
+            <motion.span
+              className="line3"
+              initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.75 }}
+              transition={{ delay: 0.5, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Link to="/shop" className="btn-primary min-w-[190px] group">
-                SHOP THE DROP <ArrowUpRight size={15} className="ml-2 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-              </Link>
-              <a href="#new-drop" className="btn-outline min-w-[190px] border-white/28 text-white hover:bg-white hover:text-charcoal">
-                <Play size={13} className="mr-2" /> EXPLORE
-              </a>
-            </motion.div>
+              Gether
+            </motion.span>
+          </h1>
 
-            <motion.div
-              className="mt-9 sm:mt-12 flex flex-wrap justify-center lg:justify-start gap-2.5"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.25, duration: 0.8 }}
-            >
-              {['New Season', 'Trending Now', 'Shop The Reel'].map((label) => (
-                <span key={label} className="brand-glass-chip px-4 py-2 text-[9px] tracking-[0.18em] uppercase text-white/55">{label}</span>
-              ))}
-            </motion.div>
-          </div>
+          <motion.p
+            className="f2g-hero-tagline"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.75, duration: 0.7 }}
+          >
+            Wear better. Look better.
+          </motion.p>
+
+          <motion.p
+            className="f2g-hero-support"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9, duration: 0.8 }}
+          >
+            Fresh drops, statement looks and trend-led fashion in a cinematic digital flagship built for discovery.
+          </motion.p>
 
           <motion.div
-            className="relative max-w-[560px] w-full mx-auto lg:mr-0"
-            initial={{ opacity: 0, x: 50, scale: 0.94 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            transition={{ delay: 0.52, duration: 1.05, ease: [0.16, 1, 0.3, 1] }}
+            className="f2g-hero-actions"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.03, duration: 0.7 }}
           >
-            <motion.div
-              className="hero-logo-card rounded-[28px] sm:rounded-[38px] p-3 sm:p-4"
-              animate={{
-                rotateY: mousePos.x * 7,
-                rotateX: mousePos.y * -6,
-                y: [0, -8, 0],
-              }}
-              transition={{ rotateX: { type: 'spring', stiffness: 45, damping: 22 }, rotateY: { type: 'spring', stiffness: 45, damping: 22 }, y: { duration: 6, repeat: Infinity, ease: 'easeInOut' } }}
-            >
-              <BrandLogo link={false} className="w-full rounded-[22px] sm:rounded-[30px]" imageClassName="w-full h-auto" priority />
-              <div className="absolute -bottom-4 left-5 right-5 sm:left-8 sm:right-8 h-8 bg-black/45 blur-2xl rounded-full" />
-            </motion.div>
-
-            <motion.div
-              className="absolute -left-4 sm:-left-8 top-[16%] brand-glass-chip px-4 py-3 text-white shadow-2xl"
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <p className="text-[9px] uppercase tracking-[.2em] text-white/45">Style signal</p>
-              <p className="text-xs sm:text-sm font-semibold mt-1">Most Trending Store</p>
-            </motion.div>
-
-            <motion.div
-              className="absolute -right-2 sm:-right-6 bottom-[14%] brand-glass-chip px-4 py-3 text-white shadow-2xl"
-              animate={{ y: [0, 9, 0] }}
-              transition={{ duration: 5.2, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <p className="text-[9px] uppercase tracking-[.2em] text-white/45">Shipping</p>
-              <p className="text-xs sm:text-sm font-semibold mt-1">Across India</p>
-            </motion.div>
+            <Link to="/shop" className="f2g-hero-primary">Shop New Arrivals <ArrowUpRight size={14} /></Link>
+            <a href="#new-drop" className="f2g-hero-secondary">Explore The Edit</a>
           </motion.div>
+
+          <motion.div
+            className="f2g-hero-logo-chip"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.18, duration: 0.7 }}
+          >
+            <BrandLogo link={false} imageClassName="h-[50px] w-auto" priority />
+          </motion.div>
+
+          <motion.a
+            href="https://instagram.com/fashion2gether_"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-5 inline-flex items-center gap-2 text-[10px] tracking-[.2em] uppercase text-white/55 hover:text-white transition-colors"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.3, duration: 0.7 }}
+          >
+            <Instagram size={14} className="text-brand-pink" /> @fashion2gether_
+          </motion.a>
         </div>
       </div>
 
       <motion.a
         href="#new-drop"
-        className="absolute z-20 bottom-5 sm:bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-white/35 hover:text-white/70 transition-colors"
+        className="absolute left-1/2 -translate-x-1/2 bottom-5 z-20 hidden sm:flex flex-col items-center gap-1.5 text-white/45"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.6 }}
-        aria-label="Scroll to new drop"
+        transition={{ delay: 1.5 }}
+        aria-label="Scroll to new arrivals"
       >
-        <span className="text-[8px] tracking-[.26em] uppercase">Scroll</span>
-        <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.8, repeat: Infinity }}>
-          <ChevronDown size={15} />
-        </motion.div>
+        <span className="text-[8px] tracking-[.3em] uppercase">Scroll</span>
+        <motion.span animate={{ y: [0, 5, 0] }} transition={{ duration: 1.7, repeat: Infinity }}>
+          <ChevronDown size={14} />
+        </motion.span>
       </motion.a>
     </section>
   );
