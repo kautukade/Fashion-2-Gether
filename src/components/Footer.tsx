@@ -1,139 +1,89 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Instagram, Facebook, Phone, Mail, MapPin } from 'lucide-react';
+import { Instagram, Phone, MessageCircle, ArrowUpRight } from 'lucide-react';
+import BrandLogo from './BrandLogo';
 
 export default function Footer() {
   return (
-    <footer className="bg-charcoal text-white">
-      {/* Main Footer */}
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
-          {/* Brand */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="font-display text-xl tracking-[0.08em] mb-4">
-              FASHION <span className="text-gradient-gold">2</span> GETHER
-            </h3>
-            <p className="text-white/50 text-sm leading-relaxed mb-6">
-              Yavatmal's most trending fashion destination. Premium styles, All India shipping, and a commitment to making you look and feel your best.
+    <footer className="brand-footer text-white overflow-hidden">
+      <div className="border-y border-white/7 py-5 overflow-hidden">
+        <div className="marquee-container">
+          <div className="marquee-content font-display text-2xl sm:text-4xl md:text-5xl text-white/12 tracking-[-.02em]">
+            <span className="px-8">WEAR BETTER • LOOK BETTER • FASHION 2 GETHER • ALL INDIA SHIPPING • </span>
+            <span className="px-8">WEAR BETTER • LOOK BETTER • FASHION 2 GETHER • ALL INDIA SHIPPING • </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+        <div className="grid lg:grid-cols-[1.25fr_.75fr_.75fr_.9fr] gap-10 lg:gap-12">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <BrandLogo className="w-[230px] sm:w-[270px] mb-6" imageClassName="h-auto" />
+            <p className="font-elegant italic text-2xl text-white/80 mb-3">Wear better. Look better.</p>
+            <p className="text-white/42 text-sm leading-relaxed max-w-md">
+              Yavatmal's most trending fashion destination with an online experience built for discovery, drops and effortless shopping across India.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="w-9 h-9 border border-white/20 rounded-full flex items-center justify-center hover:bg-gold hover:border-gold transition-all">
-                <Instagram size={15} />
-              </a>
-              <a href="#" className="w-9 h-9 border border-white/20 rounded-full flex items-center justify-center hover:bg-gold hover:border-gold transition-all">
-                <Facebook size={15} />
-              </a>
-              <a href="#" className="w-9 h-9 border border-white/20 rounded-full flex items-center justify-center hover:bg-green-600 hover:border-green-600 transition-all">
-                <Phone size={15} />
-              </a>
+            <div className="flex gap-3 mt-7">
+              <a href="https://instagram.com/fashion2gether_" target="_blank" rel="noreferrer" className="brand-icon-button" aria-label="Instagram"><Instagram size={16} /></a>
+              <a href="https://wa.me/919595535339" target="_blank" rel="noreferrer" className="brand-icon-button" aria-label="WhatsApp"><MessageCircle size={16} /></a>
+              <a href="tel:+919595535339" className="brand-icon-button" aria-label="Call Fashion 2 Gether"><Phone size={16} /></a>
             </div>
           </motion.div>
 
-          {/* Quick Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-          >
-            <h4 className="text-xs font-semibold tracking-[0.2em] uppercase mb-5 text-gold">Quick Links</h4>
-            <ul className="space-y-3">
-              {[
-                { name: 'New Arrivals', path: '/shop?filter=new' },
-                { name: 'Best Sellers', path: '/shop?filter=bestsellers' },
-                { name: 'Sale', path: '/shop?filter=sale' },
-                { name: 'Collections', path: '/shop' },
-                { name: 'Track Order', path: '/track-order' },
-                { name: 'About Us', path: '/about' },
-              ].map((link) => (
-                <li key={link.name}>
-                  <Link to={link.path} className="text-white/50 text-sm hover:text-gold transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          <FooterColumn title="Shop" links={[
+            ['New Arrivals', '/shop?filter=new'],
+            ['Trending', '/shop?filter=trending'],
+            ['Collections', '/shop'],
+            ['Sale', '/shop?filter=sale'],
+          ]} delay={0.08} />
 
-          {/* Customer Care */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            <h4 className="text-xs font-semibold tracking-[0.2em] uppercase mb-5 text-gold">Customer Care</h4>
-            <ul className="space-y-3">
-              {[
-                { name: 'Shipping Policy', path: '/shipping-policy' },
-                { name: 'Return Policy', path: '/return-policy' },
-                { name: 'Privacy Policy', path: '/privacy-policy' },
-                { name: 'Terms & Conditions', path: '/terms' },
-                { name: 'FAQ', path: '/faq' },
-                { name: 'Contact Us', path: '/contact' },
-              ].map((link) => (
-                <li key={link.name}>
-                  <Link to={link.path} className="text-white/50 text-sm hover:text-gold transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          <FooterColumn title="Support" links={[
+            ['Track Order', '/track-order'],
+            ['Contact', '/contact'],
+            ['FAQ', '/faq'],
+            ['My Account', '/account'],
+          ]} delay={0.16} />
 
-          {/* Contact */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-          >
-            <h4 className="text-xs font-semibold tracking-[0.2em] uppercase mb-5 text-gold">Get In Touch</h4>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <MapPin size={16} className="text-gold/70 mt-0.5 flex-shrink-0" />
-                <p className="text-white/50 text-sm">Main Road, Yavatmal,<br />Maharashtra 445001</p>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.24 }}>
+            <p className="brand-section-eyebrow text-[9px] uppercase mb-4">Direct line</p>
+            <a href="https://wa.me/919595535339" target="_blank" rel="noreferrer" className="group block border border-white/10 rounded-2xl p-5 bg-white/[.025] hover:bg-white/[.05] transition-colors">
+              <p className="text-white/42 text-xs">WhatsApp / Booking</p>
+              <div className="flex items-center justify-between mt-2 gap-3">
+                <span className="text-lg font-semibold">+91 95955 35339</span>
+                <ArrowUpRight size={17} className="text-gold group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
               </div>
-              <div className="flex items-center gap-3">
-                <Phone size={16} className="text-gold/70 flex-shrink-0" />
-                <p className="text-white/50 text-sm">+91 95955 35339</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Mail size={16} className="text-gold/70 flex-shrink-0" />
-                <p className="text-white/50 text-sm">hello@fashion2gether.com</p>
-              </div>
-            </div>
-
-            {/* Payment Methods */}
-            <div className="mt-6">
-              <p className="text-white/30 text-xs mb-3">We Accept</p>
-              <div className="flex gap-2 flex-wrap">
-                {['UPI', 'Cards', 'Net Banking', 'COD'].map((method) => (
-                  <span key={method} className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[10px] text-white/50">
-                    {method}
-                  </span>
-                ))}
-              </div>
-            </div>
+            </a>
+            <p className="text-white/32 text-xs leading-relaxed mt-4">Based in Yavatmal, Maharashtra. Shipping available across India.</p>
           </motion.div>
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="border-t border-white/10">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-white/30 text-xs">
-            © 2025 Fashion 2 Gether. All rights reserved.
-          </p>
-          <p className="text-white/30 text-xs">
-            Made with ♥ in Yavatmal
-          </p>
+      <div className="border-t border-white/8">
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-white/28 text-[10px] tracking-wider uppercase">© 2026 Fashion 2 Gether</p>
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-[10px] text-white/28">
+            <Link to="/privacy-policy" className="hover:text-white/60">Privacy</Link>
+            <Link to="/terms" className="hover:text-white/60">Terms</Link>
+            <Link to="/shipping-policy" className="hover:text-white/60">Shipping</Link>
+            <Link to="/return-policy" className="hover:text-white/60">Returns</Link>
+          </div>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterColumn({ title, links, delay }: { title: string; links: [string, string][]; delay: number }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay }}>
+      <p className="brand-section-eyebrow text-[9px] uppercase mb-5">{title}</p>
+      <ul className="space-y-3.5">
+        {links.map(([name, path]) => (
+          <li key={name}>
+            <Link to={path} className="text-white/46 text-sm hover:text-white transition-colors">{name}</Link>
+          </li>
+        ))}
+      </ul>
+    </motion.div>
   );
 }

@@ -1,9 +1,8 @@
-import { Suspense, useRef, useState, useEffect, lazy } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, MeshDistortMaterial, Environment } from '@react-three/drei';
-import * as THREE from 'three';
+import { Suspense, useEffect, useState, lazy } from 'react';
+import { Link } from 'react-router-dom';
+import { Canvas } from '@react-three/fiber';
+import { ArrowUpRight } from 'lucide-react';
 
-// Lazy load the 3D scene for performance
 const Scene3D = lazy(() => import('./Scene3D'));
 
 interface Fashion3DSectionProps {
@@ -15,7 +14,6 @@ export default function Fashion3DSection({ className = '' }: Fashion3DSectionPro
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Check WebGL support
     try {
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -23,75 +21,69 @@ export default function Fashion3DSection({ className = '' }: Fashion3DSectionPro
     } catch {
       setSupportsWebGL(false);
     }
-    setIsMobile(window.innerWidth < 768);
+
+    const media = window.matchMedia('(max-width: 767px)');
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener?.('change', update);
+    return () => media.removeEventListener?.('change', update);
   }, []);
 
-  // Respect prefers-reduced-motion
-  const prefersReducedMotion = typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (!supportsWebGL || prefersReducedMotion) {
-    return <FallbackSection className={className} />;
-  }
+  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   return (
-    <section className={`relative py-24 sm:py-32 overflow-hidden bg-charcoal ${className}`}>
-      {/* 3D Canvas */}
-      <div className="absolute inset-0 opacity-60">
-        <Suspense fallback={null}>
-          <Canvas
-            camera={{ position: [0, 0, 5], fov: 45 }}
-            dpr={isMobile ? [1, 1.5] : [1, 2]}
-            gl={{ antialias: !isMobile, alpha: true }}
-          >
-            <Scene3D isMobile={isMobile} />
-          </Canvas>
-        </Suspense>
-      </div>
+    <section className={`brand-3d-section relative overflow-hidden py-24 sm:py-32 lg:py-40 ${className}`}>
+      {supportsWebGL && !prefersReducedMotion && (
+        <div className="absolute inset-0 opacity-80 pointer-events-none">
+          <Suspense fallback={null}>
+            <Canvas
+              camera={{ position: [0, 0, 5], fov: 45 }}
+              dpr={isMobile ? [1, 1.35] : [1, 1.75]}
+              gl={{ antialias: !isMobile, alpha: true, powerPreference: 'high-performance' }}
+            >
+              <Scene3D isMobile={isMobile} />
+            </Canvas>
+          </Suspense>
+        </div>
+      )}
 
-      {/* Content Overlay */}
-      <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[400px]">
-          <div className="text-center lg:text-left">
-            <p className="text-gold text-xs tracking-[0.3em] uppercase mb-4">The Experience</p>
-            <h2 className="font-display text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1] mb-6">
+      <div className="absolute inset-0 bg-gradient-to-r from-[#06060a] via-[#06060a]/72 to-transparent pointer-events-none" />
+      <div className="hero-mesh opacity-20" />
+
+      <div className="relative z-10 max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[470px]">
+          <div className="text-center lg:text-left max-w-2xl">
+            <p className="brand-section-eyebrow text-[9px] sm:text-[10px] uppercase mb-5">Interactive / 3D Fashion</p>
+            <h2 className="font-display text-white text-[clamp(3rem,6.2vw,7.2rem)] leading-[0.88] tracking-[-.04em] mb-7">
               FASHION<br />
-              <span className="text-gradient-gold">THAT MOVES</span><br />
+              <span className="brand-gradient-text">THAT MOVES</span><br />
               WITH YOU
             </h2>
-            <p className="text-white/60 text-base sm:text-lg max-w-md mx-auto lg:mx-0 mb-8">
-              Every piece in our collection is designed to move with you — through seasons, celebrations, and everyday moments.
+            <p className="text-white/52 text-sm sm:text-base lg:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed mb-9">
+              A digital showroom built with depth, motion and real-time 3D — designed to make every scroll feel like a fashion film.
             </p>
-            <a href="/shop" className="btn-primary bg-gold text-white hover:bg-gold-light inline-block">
-              DISCOVER MORE
-            </a>
+            <Link to="/shop" className="btn-primary group">
+              DISCOVER THE COLLECTION <ArrowUpRight size={15} className="ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            </Link>
+          </div>
+
+          <div className="hidden lg:flex justify-end items-end self-stretch pb-8">
+            <div className="grid grid-cols-2 gap-3 w-[360px]">
+              {[
+                ['01', 'Real-time', '3D motion'],
+                ['02', 'Responsive', 'Mobile first'],
+                ['03', 'Curated', 'New drops'],
+                ['04', 'Direct', 'WhatsApp'],
+              ].map(([n, a, b]) => (
+                <div key={n} className="brand-glass-chip !rounded-2xl p-5 text-left">
+                  <span className="text-[9px] text-white/30 tracking-[.2em]">{n}</span>
+                  <p className="text-white text-sm font-semibold mt-5">{a}</p>
+                  <p className="text-white/42 text-xs mt-1">{b}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
-
-function FallbackSection({ className }: { className: string }) {
-  return (
-    <section className={`relative py-24 sm:py-32 overflow-hidden bg-charcoal ${className}`}>
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold/5 rounded-full blur-[100px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-burgundy/10 rounded-full blur-[80px]" />
-      </div>
-      <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center lg:text-left">
-        <p className="text-gold text-xs tracking-[0.3em] uppercase mb-4">The Experience</p>
-        <h2 className="font-display text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1] mb-6">
-          FASHION<br />
-          <span className="text-gradient-gold">THAT MOVES</span><br />
-          WITH YOU
-        </h2>
-        <p className="text-white/60 text-base sm:text-lg max-w-md mx-auto lg:mx-0 mb-8">
-          Every piece in our collection is designed to move with you.
-        </p>
-        <a href="/shop" className="btn-primary bg-gold text-white hover:bg-gold-light inline-block">
-          DISCOVER MORE
-        </a>
       </div>
     </section>
   );
