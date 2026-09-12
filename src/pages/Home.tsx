@@ -1,5 +1,5 @@
 import Hero from '../components/Hero';
-import BrandStatement from '../components/BrandStatement';
+import { FashionMarquee, StyleUniverse, CampaignSpotlight } from '../components/PremiumHomeExtras';
 import {
   NewDropSection,
   ShopByCategorySection,
@@ -7,7 +7,6 @@ import {
   InteractiveSection,
   ShopTheReelSection,
   BestSellersSection,
-  EditorialSection,
   SaleSection,
   CompleteTheLookSection,
   ReviewsSection,
@@ -19,20 +18,22 @@ export default function Home() {
   return (
     <main className="page-transition overflow-hidden">
       <Hero />
-      <BrandStatement />
+      <FashionMarquee />
       <div id="new-drop" className="scroll-mt-28">
         <NewDropSection />
       </div>
+      <StyleUniverse />
       <ShopByCategorySection />
-      <TrendingSection />
-      <InteractiveSection />
       <ShopTheReelSection />
+      <InteractiveSection />
+      <TrendingSection />
+      <CampaignSpotlight />
       <BestSellersSection />
-      <EditorialSection />
       <SaleSection />
       <CompleteTheLookSection />
       <ReviewsSection />
       <StoreSection />
+      <FashionMarquee />
       <NewsletterSection />
     </main>
   );
