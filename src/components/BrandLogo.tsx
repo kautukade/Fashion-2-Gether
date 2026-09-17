@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 interface BrandLogoProps {
@@ -7,21 +8,46 @@ interface BrandLogoProps {
   priority?: boolean;
 }
 
+const LOGO_SOURCES = [
+  '/brand/fashion2gether-logo-wide.jpg?v=20260917b',
+  '/brand/fashion2gether-logo.jpg?v=20260917b',
+];
+
 export default function BrandLogo({
   className = '',
   imageClassName = '',
   link = true,
   priority = false,
 }: BrandLogoProps) {
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const hasImageSource = sourceIndex < LOGO_SOURCES.length;
+
   const logo = (
-    <div className={`brand-logo-shell ${className}`}>
-      <img
-        src="/brand/fashion2gether-logo-wide.jpg"
-        alt="Fashion 2 Gether — Wear better. Look better"
-        className={`brand-logo-image ${imageClassName}`}
-        loading={priority ? 'eager' : 'lazy'}
-        decoding="async"
-      />
+    <div
+      className={`brand-logo-shell ${className}`}
+      role="img"
+      aria-label="Fashion 2 Gether"
+    >
+      {hasImageSource ? (
+        <img
+          src={LOGO_SOURCES[sourceIndex]}
+          alt=""
+          aria-hidden="true"
+          className={`brand-logo-image ${imageClassName}`}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          onError={() => setSourceIndex((current) => current + 1)}
+        />
+      ) : (
+        <div className="flex h-full min-h-[44px] w-full items-center justify-center gap-2 overflow-hidden rounded-[10px] bg-[#08080d] px-3 py-1.5">
+          <span className="font-elegant text-[22px] sm:text-[25px] italic leading-none text-[#ff0a88]">
+            Fashion
+          </span>
+          <span className="font-display text-[13px] sm:text-[15px] font-semibold tracking-[0.08em] leading-none text-white whitespace-nowrap">
+            2 <span className="text-[#168cf6]">GETHER</span>
+          </span>
+        </div>
+      )}
     </div>
   );
 
