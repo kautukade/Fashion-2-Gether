@@ -60,13 +60,13 @@ export default function Navbar() {
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative flex items-center justify-between h-[68px] lg:h-[78px]">
+          <div className="relative flex items-center justify-between h-[70px] lg:h-[78px]">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-white/85 hover:text-white transition-colors"
+              className="lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.025] text-white/85 hover:text-white transition-colors"
               aria-label="Open menu"
             >
-              <Menu size={23} />
+              <Menu size={22} />
             </button>
 
             <nav className="hidden lg:flex items-center gap-7 xl:gap-9">
@@ -84,18 +84,18 @@ export default function Navbar() {
               })}
             </nav>
 
-            <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 lg:ml-auto lg:mr-auto">
-              <BrandLogo className="w-[150px] sm:w-[175px] lg:w-[205px]" imageClassName="h-[50px] lg:h-[60px]" priority />
+            <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 lg:ml-auto lg:mr-auto max-w-[52vw] sm:max-w-none">
+              <BrandLogo className="w-[168px] sm:w-[188px] lg:w-[205px]" imageClassName="h-[46px] sm:h-[52px] lg:h-[60px]" priority />
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-2 lg:gap-3">
-              <Link to="/search" className="hidden sm:flex brand-icon-button" aria-label="Search">
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+              <Link to="/search" className="hidden lg:flex brand-icon-button" aria-label="Search">
                 <Search size={18} strokeWidth={1.7} />
               </Link>
-              <Link to="/account" className="hidden sm:flex brand-icon-button" aria-label="Account">
+              <Link to="/account" className="hidden lg:flex brand-icon-button" aria-label="Account">
                 <User size={18} strokeWidth={1.7} />
               </Link>
-              <Link to="/wishlist" className="brand-icon-button relative" aria-label="Wishlist">
+              <Link to="/wishlist" className="hidden sm:flex brand-icon-button relative" aria-label="Wishlist">
                 <Heart size={18} strokeWidth={1.7} />
                 {wishlistCount > 0 && <span className="brand-count-badge">{wishlistCount}</span>}
               </Link>
@@ -127,7 +127,7 @@ export default function Navbar() {
             >
               <div className="p-5 sm:p-6 min-h-full flex flex-col">
                 <div className="flex items-center justify-between mb-10">
-                  <BrandLogo className="w-[185px]" imageClassName="h-[58px]" priority />
+                  <BrandLogo className="w-[190px]" imageClassName="h-[56px]" priority />
                   <button onClick={() => setIsMobileMenuOpen(false)} className="brand-icon-button" aria-label="Close menu">
                     <X size={21} />
                   </button>
