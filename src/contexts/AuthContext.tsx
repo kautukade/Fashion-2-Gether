@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { DEMO_ADMIN_EMAIL, DEMO_ADMIN_PASSWORD, demoStore } from '../lib/demoStore';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -14,6 +15,17 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const DEMO_SESSION_KEY = demoStore.keys.adminSession;
+
+const demoUser = (): User => ({
+  id: 'demo-admin',
+  email: DEMO_ADMIN_EMAIL,
+  aud: 'authenticated',
+  role: 'authenticated',
+  created_at: new Date().toISOString(),
+  app_metadata: { role: 'SUPER_ADMIN', demo: true },
+  user_metadata: { name: 'Fashion 2 Gether Admin' },
+} as User);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -23,18 +35,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isSupabaseConfigured() || !supabase) {
+      demoStore.seed();
+      const active = localStorage.getItem(DEMO_SESSION_KEY) === '1';
+      if (active) {
+        setUser(demoUser());
+        setIsAdmin(true);
+      }
       setLoading(false);
       return;
     }
 
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -44,15 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Check admin status
   useEffect(() => {
+    if (!isSupabaseConfigured()) return;
     if (!user || !supabase) {
       setIsAdmin(false);
       return;
     }
 
     const checkAdmin = async () => {
-      if (!supabase) return;
       const { data } = await supabase
         .from('admin_users')
         .select('role')
@@ -66,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const signUp = async (email: string, password: string, metadata?: Record<string, string>) => {
-    if (!supabase) return { error: 'Supabase not configured' };
+    if (!supabase) return { error: 'Customer signup is disabled in demo mode.' };
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -76,18 +91,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    if (!supabase) return { error: 'Supabase not configured' };
+    if (!supabase) {
+      if (email.trim().toLowerCase() !== DEMO_ADMIN_EMAIL || password !== DEMO_ADMIN_PASSWORD) {
+        return { error: 'Invalid demo admin email or password' };
+      }
+      localStorage.setItem(DEMO_SESSION_KEY, '1');
+      setUser(demoUser());
+      setIsAdmin(true);
+      return { error: null };
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error?.message ?? null };
   };
 
   const signOut = async () => {
-    if (!supabase) return;
+    if (!supabase) {
+      localStorage.removeItem(DEMO_SESSION_KEY);
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      return;
+    }
     await supabase.auth.signOut();
   };
 
   const resetPassword = async (email: string) => {
-    if (!supabase) return { error: 'Supabase not configured' };
+    if (!supabase) return { error: 'Password reset is not available in demo mode.' };
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/account/reset-password`,
     });
