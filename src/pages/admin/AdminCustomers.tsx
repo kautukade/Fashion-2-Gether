@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { demoStore } from '../../lib/demoStore';
 
 export default function AdminCustomers() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isSupabaseConfigured() || !supabase) { setLoading(false); return; }
+    if (!isSupabaseConfigured() || !supabase) {
+      setCustomers([...demoStore.getCustomers()].reverse());
+      setLoading(false);
+      return;
+    }
     supabase.from('customers').select('*').order('created_at', { ascending: false }).then(({ data }) => {
       setCustomers(data || []);
       setLoading(false);
@@ -41,7 +46,7 @@ export default function AdminCustomers() {
             </tbody>
           </table>
         </div>
-        {customers.length === 0 && <div className="text-center py-12 text-gray-400">No customers yet</div>}
+        {customers.length === 0 && <div className="text-center py-12 text-gray-400">No customers yet — a demo checkout will create one.</div>}
       </div>
     </div>
   );
