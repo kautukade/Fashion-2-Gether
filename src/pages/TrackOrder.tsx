@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { demoStore } from '../lib/demoStore';
 
 export default function TrackOrder() {
   const [orderNumber, setOrderNumber] = useState('');
@@ -15,7 +16,17 @@ export default function TrackOrder() {
     setLoading(true);
 
     if (!isSupabaseConfigured() || !supabase) {
-      setError('Tracking is not available yet. Please contact us on WhatsApp.');
+      const normalizedPhone = phone.replace(/\D/g, '').slice(-10);
+      const match = demoStore.getOrders().find((o: any) => {
+        const orderPhone = String(o.guest_phone || o.shipping_address?.phone || '').replace(/\D/g, '').slice(-10);
+        return String(o.order_number).toUpperCase() === orderNumber.trim().toUpperCase() && orderPhone === normalizedPhone;
+      });
+      if (!match) {
+        setError('Order not found. Please check your order number and phone.');
+        setLoading(false);
+        return;
+      }
+      setOrder(match);
       setLoading(false);
       return;
     }
