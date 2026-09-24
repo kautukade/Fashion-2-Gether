@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { demoStore } from '../../lib/demoStore';
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState<Record<string, string>>({});
@@ -8,7 +9,11 @@ export default function AdminSettings() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    if (!isSupabaseConfigured() || !supabase) { setLoading(false); return; }
+    if (!isSupabaseConfigured() || !supabase) {
+      setSettings(demoStore.getSettings());
+      setLoading(false);
+      return;
+    }
     supabase.from('site_settings').select('*').then(({ data }) => {
       const map: Record<string, string> = {};
       (data || []).forEach((s: any) => { map[s.key] = s.value; });
@@ -18,10 +23,13 @@ export default function AdminSettings() {
   }, []);
 
   const handleSave = async () => {
-    if (!supabase) return;
     setSaving(true);
-    for (const [key, value] of Object.entries(settings)) {
-      await supabase.from('site_settings').upsert({ key, value });
+    if (!isSupabaseConfigured() || !supabase) {
+      demoStore.setSettings(settings);
+    } else {
+      for (const [key, value] of Object.entries(settings)) {
+        await supabase.from('site_settings').upsert({ key, value });
+      }
     }
     setSaving(false);
     setSuccess(true);
@@ -46,7 +54,10 @@ export default function AdminSettings() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-display text-charcoal">Site Settings</h1>
+        <div>
+          <h1 className="text-2xl font-display text-charcoal">Site Settings</h1>
+          {!isSupabaseConfigured() && <p className="text-xs text-amber-600 mt-1">Demo mode: changes are saved in this browser.</p>}
+        </div>
         <button onClick={handleSave} disabled={saving} className="btn-primary text-xs py-2.5">{saving ? 'Saving...' : 'Save Settings'}</button>
       </div>
 
@@ -57,12 +68,8 @@ export default function AdminSettings() {
           {fields.map(f => (
             <div key={f.key}>
               <label className="text-xs font-medium text-gray-600 block mb-1">{f.label}</label>
-              <input
-                type="text"
-                value={settings[f.key] || ''}
-                onChange={e => setSettings({...settings, [f.key]: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-200 rounded-sm text-sm focus:outline-none focus:border-gold"
-              />
+              <input type="text" value={settings[f.key] || ''} onChange={e => setSettings({...settings, [f.key]: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-200 rounded-sm text-sm focus:outline-none focus:border-gold" />
             </div>
           ))}
         </div>
