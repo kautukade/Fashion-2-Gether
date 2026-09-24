@@ -5,6 +5,7 @@ import { Lock, Truck, Check, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '../contexts/cartStore';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { demoStore } from '../lib/demoStore';
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -75,22 +76,69 @@ export default function Checkout() {
     setLoading(true);
     setError('');
 
-    // If Supabase is not configured, create a local order (demo mode)
+    // Browser demo mode: fully working checkout without Supabase.
     if (!isSupabaseConfigured() || !supabase) {
       const orderNumber = generateOrderNumber();
-      const orders = JSON.parse(localStorage.getItem('f2g-orders') || '[]');
-      orders.push({
+      const createdAt = new Date().toISOString();
+      const orderId = demoStore.newId('order');
+
+      const order = {
+        id: orderId,
         order_number: orderNumber,
         status: 'pending',
+        payment_status: form.paymentMethod === 'cod' ? 'COD' : 'pending',
+        payment_method: form.paymentMethod,
         total,
         subtotal,
         shipping_cost: shipping,
-        items: items.map(i => ({ name: i.name, size: i.size, color: i.color, quantity: i.quantity, price: i.price })),
-        shipping_address: { ...form },
-        created_at: new Date().toISOString(),
-      });
-      localStorage.setItem('f2g-orders', JSON.stringify(orders));
+        guest_email: form.email,
+        guest_phone: form.phone,
+        items: items.map(i => ({
+          variant_id: i.variantId,
+          product_id: i.productId,
+          name: i.name,
+          size: i.size,
+          color: i.color,
+          quantity: i.quantity,
+          price: i.price,
+        })),
+        shipping_address: {
+          first_name: form.firstName,
+          last_name: form.lastName,
+          phone: form.phone,
+          email: form.email,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          pincode: form.pincode,
+          landmark: form.landmark,
+        },
+        created_at: createdAt,
+      };
+
+      demoStore.setOrders([...demoStore.getOrders(), order]);
+
+      const customers = demoStore.getCustomers();
+      const existing = customers.find(c => c.phone === form.phone || c.email === form.email);
+      if (!existing) {
+        demoStore.setCustomers([...customers, {
+          id: demoStore.newId('customer'),
+          first_name: form.firstName,
+          last_name: form.lastName,
+          email: form.email,
+          phone: form.phone,
+          created_at: createdAt,
+        }]);
+      }
+
+      const quantities = new Map(items.map(i => [i.variantId, i.quantity]));
+      demoStore.setVariants(demoStore.getVariants().map(v => {
+        const qty = quantities.get(v.id);
+        return qty ? { ...v, stock_quantity: Math.max(0, Number(v.stock_quantity || 0) - qty) } : v;
+      }));
+
       clearCart();
+      setLoading(false);
       navigate(`/order-success/${orderNumber}`);
       return;
     }

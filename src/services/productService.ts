@@ -1,8 +1,13 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { products as demoProducts, categories as demoCategories } from '../data/products';
+import { demoStore } from '../lib/demoStore';
 import type { Product, Category, ProductVariant, ProductMedia } from '../types/database';
 
-// Product service - uses Supabase if configured, falls back to demo data
+const enrichDemoProduct = (product: any) => ({
+  ...product,
+  product_media: demoStore.getMedia().filter(m => m.product_id === product.id),
+  product_variants: demoStore.getVariants().filter(v => v.product_id === product.id),
+});
+
 export const productService = {
   async getAll(filters?: {
     category?: string;
@@ -16,37 +21,54 @@ export const productService = {
     bestseller?: boolean;
   }): Promise<Product[]> {
     if (!isSupabaseConfigured() || !supabase) {
-      // Fallback to demo data
-      let result = [...demoProducts] as any[];
+      let result = demoStore.getProducts();
+      const categories = demoStore.getCategories();
+      const collections = demoStore.getCollections();
+
+      if (filters?.status) result = result.filter(p => p.status === filters.status);
+      else result = result.filter(p => p.status === 'active');
+
       if (filters?.search) {
         const q = filters.search.toLowerCase();
-        result = result.filter(p => p.name.toLowerCase().includes(q) || p.category?.toLowerCase().includes(q));
+        result = result.filter(p =>
+          String(p.name || '').toLowerCase().includes(q) ||
+          String(p.description || '').toLowerCase().includes(q)
+        );
       }
-      if (filters?.featured) result = result.filter(p => p.is_featured || p.badge === 'BESTSELLER');
-      if (filters?.trending) result = result.filter(p => p.is_trending || p.badge === 'TRENDING');
-      if (filters?.bestseller) result = result.filter(p => p.is_bestseller || p.badge === 'BESTSELLER');
-      return result as Product[];
+
+      if (filters?.category) {
+        const category = categories.find(c => c.id === filters.category || c.slug === filters.category || c.name === filters.category);
+        const categoryId = category?.id || filters.category;
+        result = result.filter(p => p.category_id === categoryId);
+      }
+
+      if (filters?.collection) {
+        const collection = collections.find(c => c.id === filters.collection || c.slug === filters.collection || c.name === filters.collection);
+        const collectionId = collection?.id || filters.collection;
+        result = result.filter(p => p.collection_id === collectionId);
+      }
+
+      if (filters?.featured) result = result.filter(p => !!p.is_featured);
+      if (filters?.trending) result = result.filter(p => !!p.is_trending);
+      if (filters?.bestseller) result = result.filter(p => !!p.is_bestseller);
+      if (filters?.minPrice != null) result = result.filter(p => Number(p.selling_price || 0) >= filters.minPrice!);
+      if (filters?.maxPrice != null) result = result.filter(p => Number(p.selling_price || 0) <= filters.maxPrice!);
+
+      return result.map(enrichDemoProduct) as Product[];
     }
 
     let query = supabase.from('products').select('*, product_media(*), product_variants(*)');
 
-    if (filters?.status) {
-      query = query.eq('status', filters.status);
-    } else {
-      query = query.eq('status', 'active');
-    }
+    if (filters?.status) query = query.eq('status', filters.status);
+    else query = query.eq('status', 'active');
 
-    if (filters?.category) {
-      query = query.eq('category_id', filters.category);
-    }
+    if (filters?.category) query = query.eq('category_id', filters.category);
     if (filters?.featured) query = query.eq('is_featured', true);
     if (filters?.trending) query = query.eq('is_trending', true);
     if (filters?.bestseller) query = query.eq('is_bestseller', true);
-    if (filters?.minPrice) query = query.gte('selling_price', filters.minPrice);
-    if (filters?.maxPrice) query = query.lte('selling_price', filters.maxPrice);
-    if (filters?.search) {
-      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
-    }
+    if (filters?.minPrice != null) query = query.gte('selling_price', filters.minPrice);
+    if (filters?.maxPrice != null) query = query.lte('selling_price', filters.maxPrice);
+    if (filters?.search) query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
 
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) throw error;
@@ -55,7 +77,8 @@ export const productService = {
 
   async getBySlug(slug: string): Promise<Product & { media?: any[] } | null> {
     if (!isSupabaseConfigured() || !supabase) {
-      return (demoProducts.find(p => p.slug === slug) as unknown as Product) || null;
+      const product = demoStore.getProducts().find(p => p.slug === slug && p.status !== 'archived');
+      return product ? enrichDemoProduct(product) as Product : null;
     }
     const { data, error } = await supabase
       .from('products')
@@ -68,28 +91,7 @@ export const productService = {
 
   async getVariants(productId: string): Promise<ProductVariant[]> {
     if (!isSupabaseConfigured() || !supabase) {
-      // Return demo variants
-      const product = demoProducts.find(p => p.id === productId);
-      if (!product) return [];
-      const variants: ProductVariant[] = [];
-      product.colors.forEach(color => {
-        product.sizes.forEach(size => {
-          variants.push({
-            id: `${productId}-${color}-${size}`,
-            product_id: productId,
-            sku: `${product.slug}-${color}-${size}`.toUpperCase().replace(/\s/g, '-'),
-            color,
-            size,
-            price_override: null,
-            stock_quantity: Math.floor(Math.random() * 15) + 1,
-            low_stock_threshold: 5,
-            status: 'active',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          });
-        });
-      });
-      return variants;
+      return demoStore.getVariants().filter(v => v.product_id === productId && v.status === 'active') as ProductVariant[];
     }
     const { data, error } = await supabase
       .from('product_variants')
@@ -102,17 +104,9 @@ export const productService = {
 
   async getMedia(productId: string): Promise<ProductMedia[]> {
     if (!isSupabaseConfigured() || !supabase) {
-      const product = demoProducts.find(p => p.id === productId);
-      if (!product) return [];
-      return product.images.map((url, i) => ({
-        id: `${productId}-media-${i}`,
-        product_id: productId,
-        type: 'image' as const,
-        url,
-        sort_order: i,
-        alt_text: product.name,
-        created_at: new Date().toISOString(),
-      }));
+      return demoStore.getMedia()
+        .filter(m => m.product_id === productId)
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)) as ProductMedia[];
     }
     const { data, error } = await supabase
       .from('product_media')
@@ -125,7 +119,7 @@ export const productService = {
 
   async getCategories(): Promise<Category[]> {
     if (!isSupabaseConfigured() || !supabase) {
-      return demoCategories as unknown as Category[];
+      return demoStore.getCategories().filter(c => c.status === 'active') as Category[];
     }
     const { data, error } = await supabase
       .from('categories')
