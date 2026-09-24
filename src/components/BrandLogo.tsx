@@ -8,10 +8,7 @@ interface BrandLogoProps {
   priority?: boolean;
 }
 
-const LOGO_SOURCES = [
-  '/brand/fashion2gether-logo-wide.jpg?v=20260917b',
-  '/brand/fashion2gether-logo.jpg?v=20260917b',
-];
+const OFFICIAL_LOGO = '/brand/fashion2gether-official.webp?v=20260924';
 
 export default function BrandLogo({
   className = '',
@@ -19,8 +16,7 @@ export default function BrandLogo({
   link = true,
   priority = false,
 }: BrandLogoProps) {
-  const [sourceIndex, setSourceIndex] = useState(0);
-  const hasImageSource = sourceIndex < LOGO_SOURCES.length;
+  const [failed, setFailed] = useState(false);
 
   const logo = (
     <div
@@ -28,15 +24,15 @@ export default function BrandLogo({
       role="img"
       aria-label="Fashion 2 Gether"
     >
-      {hasImageSource ? (
+      {!failed ? (
         <img
-          src={LOGO_SOURCES[sourceIndex]}
+          src={OFFICIAL_LOGO}
           alt=""
           aria-hidden="true"
           className={`brand-logo-image ${imageClassName}`}
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
-          onError={() => setSourceIndex((current) => current + 1)}
+          onError={() => setFailed(true)}
         />
       ) : (
         <div className="flex h-full min-h-[44px] w-full items-center justify-center gap-2 overflow-hidden rounded-[10px] bg-[#08080d] px-3 py-1.5">
