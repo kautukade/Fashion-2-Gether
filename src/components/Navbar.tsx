@@ -59,17 +59,38 @@ export default function Navbar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="brand-nav-row relative flex items-center justify-between h-[70px] lg:h-[78px]">
+        <div className="max-w-[1500px] mx-auto px-3 sm:px-6 lg:px-8">
+          {/* Mobile header: fixed simple layout so the full shop name always stays visible */}
+          <div className="brand-mobile-header-row flex lg:hidden items-center h-[64px] w-full">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.025] text-white/85 hover:text-white transition-colors"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.025] text-white/85 hover:text-white transition-colors"
               aria-label="Open menu"
             >
-              <Menu size={22} />
+              <Menu size={20} />
             </button>
 
-            <nav className="hidden lg:flex items-center gap-7 xl:gap-9">
+            <Link
+              to="/"
+              className="brand-mobile-header-wordmark ml-3 inline-flex min-w-0 shrink-0 items-baseline gap-1 whitespace-nowrap"
+              aria-label="Fashion 2 Gether home"
+            >
+              <span className="font-elegant text-[21px] italic leading-none text-[#ff0a88]">Fashion</span>
+              <span className="font-display text-[11px] font-semibold leading-none text-white">2</span>
+              <span className="font-display text-[11px] font-semibold tracking-[0.06em] leading-none text-[#168cf6]">GETHER</span>
+            </Link>
+
+            <div className="ml-auto shrink-0">
+              <Link to="/cart" className="brand-icon-button relative" aria-label="Shopping bag">
+                <ShoppingBag size={18} strokeWidth={1.7} />
+                {cartCount > 0 && <span className="brand-count-badge brand-count-badge-blue">{cartCount}</span>}
+              </Link>
+            </div>
+          </div>
+
+          {/* Desktop header kept separate so desktop and mobile can never overlap */}
+          <div className="hidden lg:flex relative items-center justify-between h-[78px]">
+            <nav className="flex items-center gap-7 xl:gap-9">
               {navLinks.map((link) => {
                 const active = location.pathname === link.path || (link.path === '/shop' && location.pathname === '/shop');
                 return (
@@ -84,25 +105,18 @@ export default function Navbar() {
               })}
             </nav>
 
-            <div className="brand-nav-logo absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 lg:ml-auto lg:mr-auto max-w-[52vw] sm:max-w-none">
-              <Link to="/" className="brand-nav-mobile-wordmark" aria-label="Fashion 2 Gether home">
-                <span className="brand-nav-mobile-fashion">Fashion</span>
-                <span className="brand-nav-mobile-two">2</span>
-                <span className="brand-nav-mobile-gether">GETHER</span>
-              </Link>
-              <div className="brand-nav-desktop-logo">
-                <BrandLogo className="w-[168px] sm:w-[188px] lg:w-[205px]" imageClassName="h-[46px] sm:h-[52px] lg:h-[60px]" priority />
-              </div>
+            <div className="absolute left-1/2 -translate-x-1/2">
+              <BrandLogo className="w-[205px]" imageClassName="h-[60px]" priority />
             </div>
 
-            <div className="brand-nav-actions flex items-center gap-1.5 sm:gap-2 lg:gap-3">
-              <Link to="/search" className="hidden lg:flex brand-icon-button" aria-label="Search">
+            <div className="flex items-center gap-3">
+              <Link to="/search" className="brand-icon-button" aria-label="Search">
                 <Search size={18} strokeWidth={1.7} />
               </Link>
-              <Link to="/account" className="hidden lg:flex brand-icon-button" aria-label="Account">
+              <Link to="/account" className="brand-icon-button" aria-label="Account">
                 <User size={18} strokeWidth={1.7} />
               </Link>
-              <Link to="/wishlist" className="hidden sm:flex brand-icon-button relative" aria-label="Wishlist">
+              <Link to="/wishlist" className="brand-icon-button relative" aria-label="Wishlist">
                 <Heart size={18} strokeWidth={1.7} />
                 {wishlistCount > 0 && <span className="brand-count-badge">{wishlistCount}</span>}
               </Link>
