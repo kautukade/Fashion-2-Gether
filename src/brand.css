@@ -738,3 +738,120 @@ body {
     font-size: clamp(7.5px, 2.75vw, 9px);
   }
 }
+
+
+/* Final mobile navbar alignment: menu | logo | spacer | cart */
+@media (max-width: 639px) {
+  .brand-nav > div {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .brand-nav-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+    height: 64px !important;
+  }
+
+  .brand-nav-row > button[aria-label="Open menu"] {
+    position: relative;
+    z-index: 3;
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    margin: 0 !important;
+  }
+
+  .brand-nav-logo {
+    position: static !important;
+    left: auto !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding-left: 12px !important;
+    padding-right: 8px !important;
+    overflow: hidden !important;
+  }
+
+  .brand-nav-mobile-wordmark {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    justify-content: flex-start !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    gap: 4px !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+  }
+
+  .brand-nav-mobile-fashion {
+    font-size: 19px !important;
+    line-height: 1 !important;
+  }
+
+  .brand-nav-mobile-two {
+    font-size: 10px !important;
+    line-height: 1 !important;
+  }
+
+  .brand-nav-mobile-gether {
+    font-size: 10px !important;
+    line-height: 1 !important;
+    letter-spacing: .05em !important;
+  }
+
+  .brand-nav-actions {
+    position: relative;
+    z-index: 3;
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+  }
+
+  .brand-nav-actions .brand-icon-button {
+    width: 36px !important;
+    height: 36px !important;
+    flex: 0 0 36px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .brand-nav > div {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .brand-nav-row > button[aria-label="Open menu"],
+  .brand-nav-actions .brand-icon-button {
+    width: 34px !important;
+    height: 34px !important;
+    flex-basis: 34px !important;
+  }
+
+  .brand-nav-logo {
+    padding-left: 9px !important;
+    padding-right: 5px !important;
+  }
+
+  .brand-nav-mobile-wordmark {
+    gap: 3px !important;
+  }
+
+  .brand-nav-mobile-fashion {
+    font-size: 18px !important;
+  }
+
+  .brand-nav-mobile-two,
+  .brand-nav-mobile-gether {
+    font-size: 9px !important;
+  }
+}
