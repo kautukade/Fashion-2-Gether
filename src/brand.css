@@ -395,3 +395,88 @@ body {
     animation: none !important;
   }
 }
+
+
+/* Mobile chrome responsive hardening */
+@media (max-width: 767px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+  }
+
+  .brand-nav > div {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .brand-nav > div > div {
+    height: 64px !important;
+  }
+
+  .brand-nav .brand-logo-shell {
+    width: min(44vw, 138px);
+    min-height: 40px;
+    padding: 2px 5px;
+  }
+
+  .brand-nav .brand-logo-image {
+    height: 36px !important;
+  }
+
+  .brand-icon-button {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+  }
+
+  .bottom-nav {
+    padding-top: 6px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+  }
+
+  .bottom-nav > div {
+    width: 100%;
+    max-width: 100%;
+    gap: 0;
+  }
+
+  .bottom-nav a {
+    min-width: 0 !important;
+    flex: 1 1 20%;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .brand-nav > div {
+    padding-left: 9px !important;
+    padding-right: 9px !important;
+  }
+
+  .brand-nav .brand-logo-shell {
+    width: min(42vw, 120px);
+  }
+
+  .brand-nav .brand-logo-image {
+    height: 34px !important;
+  }
+
+  .brand-icon-button,
+  .brand-nav button[aria-label="Open menu"] {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .bottom-nav a > span:last-child {
+    font-size: 7px !important;
+    letter-spacing: .08em !important;
+  }
+}

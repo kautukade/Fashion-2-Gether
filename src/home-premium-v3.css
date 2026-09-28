@@ -257,3 +257,246 @@
   .ph-ticker-track { animation: none; }
   .ph-cover-card > img, .ph-editorial-card > img, .ph-category-card img, .ph-social-card img { transition: none; }
 }
+
+
+/* Mobile storefront responsive hardening */
+@media (max-width: 767px) {
+  .ph-home {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .ph-hero {
+    padding-top: 102px;
+    min-height: auto;
+  }
+
+  .ph-hero-inner {
+    width: min(540px, calc(100% - 24px));
+    min-height: auto;
+    padding: 28px 0 calc(84px + env(safe-area-inset-bottom));
+    gap: 28px;
+  }
+
+  .ph-hero-copy,
+  .ph-hero-brandline,
+  .ph-hero-actions,
+  .ph-hero-meta {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .ph-hero-brandline {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  /* The main navbar already carries the logo on phones; hiding this duplicate
+     gives the hero enough breathing room on narrow screens. */
+  .ph-hero-logo {
+    display: none;
+  }
+
+  .ph-hero-brandline > span {
+    font-size: 9px;
+    line-height: 1.4;
+    letter-spacing: .17em;
+  }
+
+  .ph-hero-kicker {
+    margin-bottom: 12px;
+    font-size: 9px;
+    line-height: 1.45;
+    letter-spacing: .25em;
+  }
+
+  .ph-hero h1 {
+    max-width: 100%;
+    font-size: clamp(3rem, 17vw, 4.8rem);
+    line-height: .9;
+    letter-spacing: -.045em;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .ph-hero-lead {
+    max-width: 34rem;
+    margin-top: 18px;
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+
+  .ph-hero-actions {
+    margin-top: 22px;
+    gap: 10px;
+  }
+
+  .ph-primary-cta,
+  .ph-secondary-cta {
+    min-height: 48px;
+    padding-inline: 16px;
+    font-size: 10px;
+    letter-spacing: .09em;
+  }
+
+  .ph-hero-meta {
+    margin-top: 26px;
+    gap: 6px;
+  }
+
+  .ph-hero-meta > div {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    align-items: start;
+    gap: 4px;
+    padding-top: 9px;
+  }
+
+  .ph-hero-meta span {
+    font-size: 9px;
+    letter-spacing: .08em;
+  }
+
+  .ph-hero-backdrop img {
+    object-position: 62% 18%;
+    filter: saturate(.8) brightness(.48) contrast(1.06);
+    transform: scale(1.02);
+  }
+
+  .ph-hero-backdrop::after {
+    background:
+      linear-gradient(180deg, rgba(7,7,11,.7) 0%, rgba(7,7,11,.78) 44%, rgba(7,7,11,.96) 100%),
+      linear-gradient(90deg, rgba(7,7,11,.72), rgba(7,7,11,.34));
+  }
+
+  .ph-hero-visual {
+    width: min(100%, 430px);
+    margin: 2px auto 0;
+  }
+
+  .ph-cover-card {
+    aspect-ratio: 4 / 5;
+    border-radius: 18px;
+  }
+
+  .ph-cover-topline {
+    left: 16px;
+    right: 16px;
+    top: 15px;
+  }
+
+  .ph-cover-bottom {
+    left: 16px;
+    right: 16px;
+    bottom: 17px;
+  }
+
+  .ph-cover-bottom h2 {
+    font-size: clamp(1.65rem, 8vw, 2.25rem);
+  }
+
+  .ph-section {
+    width: calc(100% - 24px);
+    padding: 64px 0;
+  }
+
+  .ph-section-head {
+    margin-bottom: 32px;
+  }
+
+  .ph-section-head-split {
+    gap: 16px;
+  }
+
+  .ph-section-intro p {
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .ph-editorial-card {
+    min-height: min(145vw, 560px);
+  }
+
+  .ph-new-drop-products {
+    gap: 14px;
+  }
+
+  .ph-category-section {
+    padding: 64px 12px;
+    gap: 34px;
+  }
+
+  .ph-category-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .ph-category-card,
+  .ph-category-card:nth-child(1),
+  .ph-category-card:nth-child(4) {
+    min-height: clamp(340px, 112vw, 520px);
+  }
+
+  .ph-category-label {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .ph-category-label h3 {
+    font-size: 24px;
+  }
+
+  .ph-product-rail {
+    grid-auto-columns: minmax(250px, 84vw);
+  }
+
+  .ph-social-copy {
+    padding: 58px 14px 42px;
+  }
+
+  .ph-social-cards {
+    min-height: 450px;
+  }
+
+  .ph-conversion-strip {
+    width: calc(100% - 24px);
+    padding-bottom: 94px;
+  }
+}
+
+@media (max-width: 360px) {
+  .ph-hero-inner {
+    width: calc(100% - 20px);
+    padding-top: 24px;
+  }
+
+  .ph-hero h1 {
+    font-size: clamp(2.75rem, 17.5vw, 3.8rem);
+  }
+
+  .ph-hero-lead {
+    font-size: 12.5px;
+  }
+
+  .ph-new-drop-products {
+    grid-template-columns: 1fr;
+  }
+
+  .ph-editorial-card {
+    min-height: 132vw;
+  }
+
+  .ph-product-rail {
+    grid-auto-columns: 88vw;
+  }
+
+  .ph-category-card,
+  .ph-category-card:nth-child(1),
+  .ph-category-card:nth-child(4) {
+    min-height: 118vw;
+  }
+}
