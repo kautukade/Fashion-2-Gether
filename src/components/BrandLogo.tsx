@@ -24,6 +24,11 @@ export default function BrandLogo({
       role="img"
       aria-label="Fashion 2 Gether"
     >
+      <div className="brand-logo-mobile-wordmark" aria-hidden="true">
+        <span className="brand-logo-mobile-fashion">Fashion</span>
+        <span className="brand-logo-mobile-two">2</span>
+        <span className="brand-logo-mobile-gether">GETHER</span>
+      </div>
       {!failed ? (
         <img
           src={OFFICIAL_LOGO}

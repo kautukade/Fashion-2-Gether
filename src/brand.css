@@ -546,3 +546,93 @@ body {
     width: min(34vw, 112px) !important;
   }
 }
+
+
+/* Mobile wordmark visibility fix */
+.brand-logo-mobile-wordmark {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .brand-nav-logo {
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  .brand-nav-logo > a {
+    display: block;
+  }
+
+  .brand-nav-logo .brand-logo-shell {
+    width: auto !important;
+    min-width: 142px !important;
+    max-width: 156px !important;
+    min-height: 40px !important;
+    padding: 4px 9px !important;
+    overflow: visible !important;
+  }
+
+  .brand-nav-logo .brand-logo-image {
+    display: none !important;
+  }
+
+  .brand-nav-logo .brand-logo-mobile-wordmark {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  .brand-logo-mobile-fashion {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 500;
+    color: #ff0a88;
+    letter-spacing: -.02em;
+  }
+
+  .brand-logo-mobile-two {
+    font-family: 'Playfair Display', serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .brand-logo-mobile-gether {
+    font-family: 'Playfair Display', serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: #168cf6;
+  }
+}
+
+@media (max-width: 360px) {
+  .brand-nav-logo .brand-logo-shell {
+    min-width: 132px !important;
+    max-width: 138px !important;
+    padding-inline: 7px !important;
+  }
+
+  .brand-logo-mobile-wordmark {
+    gap: 5px !important;
+  }
+
+  .brand-logo-mobile-fashion {
+    font-size: 20px;
+  }
+
+  .brand-logo-mobile-two,
+  .brand-logo-mobile-gether {
+    font-size: 11px;
+  }
+
+  .brand-logo-mobile-gether {
+    letter-spacing: .055em;
+  }
+}
