@@ -480,3 +480,69 @@ body {
     letter-spacing: .08em !important;
   }
 }
+
+
+/* Mobile/tablet navbar collision fix */
+@media (max-width: 1023px) {
+  .brand-nav-row {
+    display: grid !important;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 8px;
+  }
+
+  .brand-nav-row > button[aria-label="Open menu"] {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .brand-nav-logo {
+    position: static !important;
+    left: auto !important;
+    transform: none !important;
+    grid-column: 2;
+    justify-self: center;
+    min-width: 0;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .brand-nav-logo .brand-logo-shell {
+    width: clamp(106px, 34vw, 170px) !important;
+    max-width: 100%;
+  }
+
+  .brand-nav-actions {
+    grid-column: 3;
+    justify-self: end;
+    min-width: max-content;
+  }
+}
+
+@media (max-width: 639px) {
+  .brand-nav-row {
+    grid-template-columns: 36px minmax(0, 1fr) 36px;
+    column-gap: 6px;
+  }
+
+  .brand-nav-logo .brand-logo-shell {
+    width: clamp(100px, 36vw, 136px) !important;
+  }
+
+  /* Search/profile/wishlist stay in the bottom navigation on phones.
+     Keeping only cart in the top bar prevents the shop name from covering icons. */
+  .brand-nav-actions > a[aria-label="Wishlist"] {
+    display: none !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .brand-nav-row {
+    grid-template-columns: 34px minmax(0, 1fr) 34px;
+    column-gap: 4px;
+  }
+
+  .brand-nav-logo .brand-logo-shell {
+    width: min(34vw, 112px) !important;
+  }
+}

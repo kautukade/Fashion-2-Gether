@@ -60,7 +60,7 @@ export default function Navbar() {
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative flex items-center justify-between h-[70px] lg:h-[78px]">
+          <div className="brand-nav-row relative flex items-center justify-between h-[70px] lg:h-[78px]">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.025] text-white/85 hover:text-white transition-colors"
@@ -84,11 +84,11 @@ export default function Navbar() {
               })}
             </nav>
 
-            <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 lg:ml-auto lg:mr-auto max-w-[52vw] sm:max-w-none">
+            <div className="brand-nav-logo absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 lg:ml-auto lg:mr-auto max-w-[52vw] sm:max-w-none">
               <BrandLogo className="w-[168px] sm:w-[188px] lg:w-[205px]" imageClassName="h-[46px] sm:h-[52px] lg:h-[60px]" priority />
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+            <div className="brand-nav-actions flex items-center gap-1.5 sm:gap-2 lg:gap-3">
               <Link to="/search" className="hidden lg:flex brand-icon-button" aria-label="Search">
                 <Search size={18} strokeWidth={1.7} />
               </Link>
