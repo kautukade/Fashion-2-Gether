@@ -636,3 +636,105 @@ body {
     letter-spacing: .055em;
   }
 }
+
+
+/* Definitive mobile navbar wordmark fix */
+.brand-nav-mobile-wordmark {
+  display: none;
+}
+
+.brand-nav-desktop-logo {
+  display: block;
+}
+
+@media (max-width: 639px) {
+  .brand-nav-logo {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-nav-desktop-logo {
+    display: none !important;
+  }
+
+  .brand-nav-mobile-wordmark {
+    display: inline-flex !important;
+    align-items: baseline;
+    justify-content: center;
+    gap: 3px;
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    white-space: nowrap;
+    text-decoration: none;
+    line-height: 1;
+    overflow: hidden;
+  }
+
+  .brand-nav-mobile-fashion {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(16px, 5.2vw, 19px);
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: -.03em;
+    color: #ff0a88;
+  }
+
+  .brand-nav-mobile-two {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(8px, 2.7vw, 10px);
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .brand-nav-mobile-gether {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(8px, 2.7vw, 10px);
+    font-weight: 700;
+    letter-spacing: .035em;
+    color: #168cf6;
+  }
+
+  /* Kill the old mobile logo rules so a second logo can never sit behind the wordmark. */
+  .brand-nav-logo .brand-logo-shell,
+  .brand-nav-logo .brand-logo-image,
+  .brand-nav-logo .brand-logo-mobile-wordmark {
+    display: none !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .brand-nav-row {
+    grid-template-columns: 32px minmax(0, 1fr) 32px !important;
+    column-gap: 3px !important;
+  }
+
+  .brand-nav > div {
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+  }
+
+  .brand-nav-row > button[aria-label="Open menu"],
+  .brand-nav-actions .brand-icon-button {
+    width: 32px !important;
+    height: 32px !important;
+    flex-basis: 32px !important;
+  }
+
+  .brand-nav-mobile-wordmark {
+    gap: 2px;
+  }
+
+  .brand-nav-mobile-fashion {
+    font-size: clamp(15px, 5.3vw, 18px);
+  }
+
+  .brand-nav-mobile-two,
+  .brand-nav-mobile-gether {
+    font-size: clamp(7.5px, 2.75vw, 9px);
+  }
+}

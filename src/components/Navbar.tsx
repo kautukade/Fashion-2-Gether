@@ -85,7 +85,14 @@ export default function Navbar() {
             </nav>
 
             <div className="brand-nav-logo absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 lg:ml-auto lg:mr-auto max-w-[52vw] sm:max-w-none">
-              <BrandLogo className="w-[168px] sm:w-[188px] lg:w-[205px]" imageClassName="h-[46px] sm:h-[52px] lg:h-[60px]" priority />
+              <Link to="/" className="brand-nav-mobile-wordmark" aria-label="Fashion 2 Gether home">
+                <span className="brand-nav-mobile-fashion">Fashion</span>
+                <span className="brand-nav-mobile-two">2</span>
+                <span className="brand-nav-mobile-gether">GETHER</span>
+              </Link>
+              <div className="brand-nav-desktop-logo">
+                <BrandLogo className="w-[168px] sm:w-[188px] lg:w-[205px]" imageClassName="h-[46px] sm:h-[52px] lg:h-[60px]" priority />
+              </div>
             </div>
 
             <div className="brand-nav-actions flex items-center gap-1.5 sm:gap-2 lg:gap-3">
